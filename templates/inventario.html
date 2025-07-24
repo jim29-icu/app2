@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Inventario</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="container mt-4">
+    <h2 class="mb-4 text-center">Inventario - Stock</h2>
+
+    <form method="GET" class="row mb-4">
+      <div class="col-md-10">
+        <input type="text" name="q" value="{{ busqueda }}" class="form-control" placeholder="Buscar por descripción, lote, producto...">
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Buscar</button>
+      </div>
+    </form>
+       <div class="text-center mt-4">
+      <a href="/logout" class="btn btn-outline-danger">Cerrar sesión</a>
+    </div>
+    <div class="mb-3 text-end">
+      <a href="/agregar" class="btn btn-success">+ Agregar producto</a>
+    </div>
+    <th>Estado</th>
+    <th>Acciones</th>
+
+
+    <table class="table table-bordered table-hover table-sm bg-white">
+      <thead class="table-dark">
+        <tr>
+          <th>LOT</th>
+          <th>ListNumber</th>
+          <th>Description</th>
+          <th>Product Number</th>
+          <th>Description B</th>
+          <th>Product Type</th>
+          <th>Located</th>
+          <th>Income</th>
+          <th>Spent</th>
+          <th>Stock</th>
+          <th>Status</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for item in productos %}
+        <tr>
+          <td>{{ item["LOT"] }}</td>
+          <td>{{ item["ListNumber"] }}</td>
+          <td>{{ item["Description"] }}</td>
+          <td>{{ item["Product Number"] }}</td>
+          <td>{{ item["Description b"] }}</td>
+          <td>{{ item["Product Type"] }}</td>
+          <td>{{ item["Located"] }}</td>
+          <td>{{ item["Income"] }}</td>
+          <td>{{ item["Spent"] }}</td>
+          <td>{{ item["STOCK"] }}</td>
+          <td>
+            {% if item["STATUS"] %}
+              <span class="badge bg-success">Activo</span>
+            {% else %}
+              <span class="badge bg-secondary">Inactivo</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="/editar/{{ item._id }}" class="btn btn-sm btn-outline-primary">Editar</a>
+            <a href="/eliminar/{{ item._id }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar este producto?')">Eliminar</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+        <!-- PAGINACIÓN -->
+<nav aria-label="Paginación del inventario">
+  <ul class="pagination justify-content-center">
+    <!-- Botón anterior -->
+    <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+      <a class="page-link" href="?q={{ busqueda }}&page={{ page - 1 }}" tabindex="-1" aria-disabled="{{ 'true' if page <= 1 else 'false' }}">
+        &laquo; Anterior
+      </a>
+    </li>
+
+    <!-- Números de página -->
+    {% for p in range(1, total_paginas + 1) %}
+      {% if p == page %}
+        <li class="page-item active" aria-current="page">
+          <span class="page-link">{{ p }}</span>
+        </li>
+      {% elif p <= 2 or p > total_paginas - 2 or (p >= page - 1 and p <= page + 1) %}
+        <li class="page-item"><a class="page-link" href="?q={{ busqueda }}&page={{ p }}">{{ p }}</a></li>
+      {% elif p == 3 and page > 4 %}
+        <li class="page-item disabled"><span class="page-link">...</span></li>
+      {% elif p == total_paginas - 2 and page < total_paginas - 3 %}
+        <li class="page-item disabled"><span class="page-link">...</span></li>
+      {% endif %}
+    {% endfor %}
+
+    <!-- Botón siguiente -->
+    <li class="page-item {% if page >= total_paginas %}disabled{% endif %}">
+      <a class="page-link" href="?q={{ busqueda }}&page={{ page + 1 }}" aria-disabled="{{ 'true' if page >= total_paginas else 'false' }}">
+        Siguiente &raquo;
+      </a>
+    </li>
+  </ul>
+</nav>
+
+
+ 
+  </div>
+</body>
+</html>
