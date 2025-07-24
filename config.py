@@ -1,2 +1,8 @@
-MONGO_URI = "mongodb+srv://jimmysoza:8VQfT5HLgDfXc4cQ@cluster0.azkuc1h.mongodb.net/?retryWrites=true&w=majority&tls=true&appName=Cluster0"
+import os
+
+MONGO_URI = os.getenv("MONGO_URI")
+
+if MONGO_URI is None:
+    raise Exception("Error: La variable de entorno MONGO_URI no está definida.")
+
 
