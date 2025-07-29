@@ -31,17 +31,20 @@
       <thead class="table-dark">
         <tr>
           <th>LOT</th>
-          <th>ListNumber</th>
+          <th>List Number</th>
           <th>Description</th>
-          <th>Product Number</th>
-          <th>Description B</th>
           <th>Product Type</th>
           <th>Located</th>
+          <th>Date-In</th>
+          <th>QTY Vol</th>
+          <th>Unit</th>
           <th>Income</th>
-          <th>Spent</th>
-          <th>Stock</th>
-          <th>Status</th>
-          <th>Acciones</th>
+          <th>STOCK</th>
+          <th>Qty_Per_Box</th>
+          <th>Box_Available</th>
+          <th>Maximum _Storage Days</th>
+          
+
         </tr>
       </thead>
 
@@ -51,20 +54,17 @@
           <td>{{ item["LOT"] }}</td>
           <td>{{ item["ListNumber"] }}</td>
           <td>{{ item["Description"] }}</td>
-          <td>{{ item["Product Number"] }}</td>
-          <td>{{ item["Description b"] }}</td>
-          <td>{{ item["Product Type"] }}</td>
+          <td>{{ item["Product_Type"] }}</td>
           <td>{{ item["Located"] }}</td>
+          <td>{{ item["Date_In"] }}</td>
+          <td>{{ item["QTY_Vol."] }}</td>
+          <td>{{ item["Unit"] }}</td>
           <td>{{ item["Income"] }}</td>
-          <td>{{ item["Spent"] }}</td>
           <td>{{ item["STOCK"] }}</td>
-          <td>
-            {% if item["STATUS"] %}
-              <span class="badge bg-success">Activo</span>
-            {% else %}
-              <span class="badge bg-secondary">Inactivo</span>
-            {% endif %}
-          </td>
+          <td>{{ item["Qty_Per_Box"] }}</td>
+          <td>{{ item["Box_Available"] }}</td>
+         <td>{{ item["Maximum _Storage (Days)"] }}</td>
+          
           <td>
             <a href="/editar/{{ item._id }}" class="btn btn-sm btn-outline-primary">Editar</a>
             <a href="/eliminar/{{ item._id }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar este producto?')">Eliminar</a>
