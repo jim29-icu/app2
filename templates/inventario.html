@@ -23,56 +23,58 @@
     <div class="mb-3 text-end">
       <a href="/agregar" class="btn btn-success">+ Agregar producto</a>
     </div>
-    <th>Estado</th>
-    <th>Acciones</th>
+   
 
 
-    <table class="table table-bordered table-hover table-sm bg-white">
-      <thead class="table-dark">
-        <tr>
-          <th>LOT</th>
-          <th>List Number</th>
-          <th>Description</th>
-          <th>Product Type</th>
-          <th>Located</th>
-          <th>Date-In</th>
-          <th>QTY Vol</th>
-          <th>Unit</th>
-          <th>Income</th>
-          <th>STOCK</th>
-          <th>Qty_Per_Box</th>
-          <th>Box_Available</th>
-          <th>Maximum _Storage Days</th>
-          
+    <div class="d-flex justify-content-center">
+  <table class="table table-bordered table-hover table-sm bg-white" style="width: auto;">
+    <thead class="table-dark">
+      <tr>
+        <th>LOT</th>
+        <th>List Number</th>
+        <th>Description</th>
+        <th>Product Type</th>
+        <th>Located</th>
+        <th>Date-In</th>
+        <th>QTY Vol</th>
+        <th>Unit</th>
+        <th>Income</th>
+        <th>STOCK</th>
+        <th>Qty_Per_Box</th>
+        <th>Box_Available</th>
+        <th>Maximum _Storage Days</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in productos %}
+      <tr>
+        <td>{{ item["LOT"] }}</td>
+        <td>{{ item["ListNumber"] }}</td>
+        <td>{{ item["Description"] }}</td>
+        <td>{{ item["Product_Type"] }}</td>
+        <td>{{ item["Located"] }}</td>
+        <td>{{ item["Date_In"] }}</td>
+        <td>{{ item["QTY_Vol"] }}</td>
+        <td>{{ item["Unit"] }}</td>
+        <td>{{ item["Income"] }}</td>
+        <td>{{ item["STOCK"] }}</td>
+        <td>{{ item["Qty_Per_Box"] }}</td>
+        <td>{{ item["Box_Available"] }}</td>
+        <td>{{ item["Maximum _Storage (Days)"] }}</td>
+       <td>
+  <div class="d-flex justify-content-center gap-2">
+    <a href="/editar/{{ item._id }}" class="btn btn-sm btn-outline-primary">Editar</a>
+    <a href="/eliminar/{{ item._id }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar este producto?')">Eliminar</a>
+  </div>
+</td>
 
-        </tr>
-      </thead>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 
-      <tbody>
-        {% for item in productos %}
-        <tr>
-          <td>{{ item["LOT"] }}</td>
-          <td>{{ item["ListNumber"] }}</td>
-          <td>{{ item["Description"] }}</td>
-          <td>{{ item["Product_Type"] }}</td>
-          <td>{{ item["Located"] }}</td>
-          <td>{{ item["Date_In"] }}</td>
-          <td>{{ item["QTY_Vol"] }}</td>
-          <td>{{ item["Unit"] }}</td>
-          <td>{{ item["Income"] }}</td>
-          <td>{{ item["STOCK"] }}</td>
-          <td>{{ item["Qty_Per_Box"] }}</td>
-          <td>{{ item["Box_Available"] }}</td>
-         <td>{{ item["Maximum _Storage (Days)"] }}</td>
-          
-          <td>
-            <a href="/editar/{{ item._id }}" class="btn btn-sm btn-outline-primary">Editar</a>
-            <a href="/eliminar/{{ item._id }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar este producto?')">Eliminar</a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
 
         <!-- PAGINACIÓN -->
 <nav aria-label="Paginación del inventario">

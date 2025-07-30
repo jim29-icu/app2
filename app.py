@@ -70,23 +70,32 @@ def agregar():
         return redirect('/')
 
     if request.method == 'POST':
-        nuevo_producto = {
-            "Description": request.form['description'],
-            "LOT": request.form['lot'],
-            "ListNumber": request.form['list_number'],
-            "Product Number": request.form['product_number'],
-            "Description b": request.form['description_b'],
-            "Product Type": request.form['product_type'],
-            "Located": request.form['located'],
-            "Income": int(request.form['income']),
-            "Spent": int(request.form['spent']),
-            "STOCK": float(request.form['stock']),
-            "STATUS": request.form.get('status') == 'on'
-        }
-        collection.insert_one(nuevo_producto)
-        return redirect('/inventario')
+        try:
+            nuevo_producto = {
+                "LOT": request.form['LOT'],
+                "ListNumber": request.form['list_number'],
+                "Description": request.form['description'],
+                "Product_Type": request.form['product_type'],
+                "Located": request.form['located'],
+                "Date_In": request.form['Date_In'],
+                "QTY_Vol": request.form['QTY_Vol'],
+                "Unit": request.form['Unit'],
+                "Income": int(request.form['income']),
+                "STOCK": float(request.form['stock']),
+                "Qty_Per_Box": float(request.form['Qty_Per_Box']),
+                "Box_Available": float(request.form['Box_Available']),
+                "Maximum _Storage (Days)": float(request.form['Maximum_Storage_Days']),
+                "STATUS": True  # o False por defecto si no se usa en el formulario
+            }
+
+            collection.insert_one(nuevo_producto)
+            return redirect('/inventario')
+
+        except (KeyError, ValueError) as e:
+            return f"Error en los datos del formulario: {e}"
 
     return render_template('agregar.html')
+
 
 @app.route('/editar/<id>', methods=['GET', 'POST'])
 def editar(id):
@@ -99,32 +108,37 @@ def editar(id):
 
     if request.method == 'POST':
         try:
-            # Obtener valores de formulario
-            income_original = int(request.form['income'])
+            # Obtener valores del formulario
+            income_original = int(request.form.get('income', 0))
             add = int(request.form.get('add', 0))
             lower = int(request.form.get('lower', 0))
             income_actualizado = income_original + add - lower
 
             datos_actualizados = {
-                "Description": request.form['description'],
                 "LOT": request.form['lot'],
                 "ListNumber": request.form['list_number'],
-                "Product Number": request.form['product_number'],
-                "Description b": request.form['description_b'],
-                "Product Type": request.form['product_type'],
+                "Description": request.form['description'],
+                "Product_Type": request.form['product_type'],
                 "Located": request.form['located'],
+                "Date_In": request.form['Date_In'],
+                "QTY_Vol": request.form['QTY_Vol'],
+                "Unit": request.form['Unit'],
                 "Income": income_actualizado,
-                "Spent": int(request.form['spent']),
                 "STOCK": float(request.form['stock']),
+                "Qty_Per_Box": request.form['Qty_Per_Box'],
+                "Box_Available": request.form['Box_Available'],
+                "Maximum _Storage (Days)": request.form['Maximum_Storage_Days'],
                 "STATUS": request.form.get('status') == 'on'
             }
 
             collection.update_one({'_id': ObjectId(id)}, {'$set': datos_actualizados})
             return redirect('/inventario')
+
         except ValueError:
             return "Error en los datos ingresados"
 
     return render_template('editar.html', producto=producto)
+
 
 
 

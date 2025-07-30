@@ -12,48 +12,68 @@
     <form method="POST">
       <div class="row g-3">
         <div class="col-md-6">
-          <label for="description" class="form-label">Descripción</label>
-          <input type="text" class="form-control" name="description" required>
+          <label for="LOT" class="form-label">Lot</label>
+          <input type="text" class="form-control" name="LOT" required>
         </div>
-        <div class="col-md-6">
-          <label for="lot" class="form-label">LOT</label>
-          <input type="text" class="form-control" name="lot" required>
-        </div>
+
         <div class="col-md-6">
           <label for="list_number" class="form-label">List Number</label>
-          <input type="text" class="form-control" name="list_number">
+          <input type="text" class="form-control" name="list_number" required>
         </div>
+
         <div class="col-md-6">
-          <label for="product_number" class="form-label">Product Number</label>
-          <input type="text" class="form-control" name="product_number">
+          <label for="description" class="form-label">Description</label>
+          <input type="text" class="form-control" name="description">
         </div>
-        <div class="col-md-6">
-          <label for="description_b" class="form-label">Descripción B</label>
-          <input type="text" class="form-control" name="description_b">
-        </div>
+
         <div class="col-md-6">
           <label for="product_type" class="form-label">Product Type</label>
           <input type="text" class="form-control" name="product_type">
         </div>
+
         <div class="col-md-6">
-          <label for="located" class="form-label">Ubicación</label>
+          <label for="located" class="form-label">Located</label>
           <input type="text" class="form-control" name="located">
         </div>
+
+        <div class="col-md-6">
+          <label for="Date_In" class="form-label">Date-In</label>
+          <input type="date" class="form-control" name="Date_In" id="Date_In">
+        </div>
+
+        <div class="col-md-6">
+          <label for="QTY_Vol" class="form-label">QTY Vol</label>
+          <input type="number" class="form-control" name="QTY_Vol">
+        </div>
+
         <div class="col-md-4">
-          <label for="income" class="form-label">Ingreso</label>
+          <label for="Unit" class="form-label">Unit</label>
+          <input type="text" class="form-control" name="Unit" required>
+        </div>
+
+        <div class="col-md-4">
+          <label for="income" class="form-label">Income</label>
           <input type="number" class="form-control" name="income" required>
         </div>
-        <div class="col-md-4">
-          <label for="spent" class="form-label">Salida</label>
-          <input type="number" class="form-control" name="spent" required>
-        </div>
+
         <div class="col-md-4">
           <label for="stock" class="form-label">Stock</label>
           <input type="number" step="0.01" class="form-control" name="stock" required>
         </div>
-        <div class="col-md-12 form-check">
-          <input type="checkbox" class="form-check-input" name="status" id="status">
-          <label class="form-check-label" for="status">Activo</label>
+
+        <div class="col-md-4">
+          <label for="Qty_Per_Box" class="form-label">Qty Per Box</label>
+          <input type="number" step="0.01" class="form-control" name="Qty_Per_Box" required>
+        </div>
+
+        <div class="col-md-4">
+          <label for="Box_Available" class="form-label">Box Available</label>
+          <input type="number" step="0.01" class="form-control" name="Box_Available" required>
+        </div>
+
+        <div class="col-md-4">
+          <label for="Maximum_Storage_Days" class="form-label">Maximum Storage Days</label>
+          <input type="number" step="0.01" class="form-control" name="Maximum_Storage_Days" required>
         </div>
       </div>
 
