@@ -1,18 +1,17 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, flash, url_for, jsonify
 from pymongo import MongoClient
 from bson.objectid import ObjectId
-import re
 import config
-import math
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = 'clave_secreta'
 
 # Conexión a MongoDB Atlas
 client = MongoClient(config.MONGO_URI)
-db = client['MigrationData']  # Cambia según tu DB real
+db = client['MigrationData']
 usuarios = db['usuarios']
-collection = db['Stock']  # Tu colección Stock
+collection = db['Stock']
 
 @app.route('/')
 def index():
@@ -30,26 +29,37 @@ def login():
 
 @app.route('/inventario')
 def inventario():
-    busqueda = request.args.get('q', '')  # Obtener texto de búsqueda
-    page = request.args.get('page', 1, type=int)  # Página actual, default 1
-    per_page = 10  # Cantidad de productos por página
+    if 'usuario' not in session:
+        return redirect('/')
+
+    busqueda = request.args.get('q', '')
+    page = int(request.args.get('page', 1))
+    por_pagina = 10
 
     filtro = {}
     if busqueda:
-        regex = re.compile(re.escape(busqueda), re.IGNORECASE)
         filtro = {
             "$or": [
-                {"Description": regex},
-                {"LOT": regex},
-                {"Product Number": regex}
+                {"LOT": {"$regex": busqueda, "$options": "i"}},
+                {"Description": {"$regex": busqueda, "$options": "i"}},
+                {"ListNumber": {"$regex": busqueda, "$options": "i"}},
+                {"Product_Type": {"$regex": busqueda, "$options": "i"}},
             ]
         }
 
-    total_items = collection.count_documents(filtro)  # total productos que coinciden
-    total_paginas = math.ceil(total_items / per_page)
+    total_productos = collection.count_documents(filtro)
+    total_paginas = (total_productos + por_pagina - 1) // por_pagina
 
-    productos_cursor = collection.find(filtro).skip((page - 1) * per_page).limit(per_page)
+    productos_cursor = collection.find(filtro).skip((page - 1) * por_pagina).limit(por_pagina)
     productos = list(productos_cursor)
+
+    for prod in productos:
+        if 'Date_In' in prod:
+            try:
+                fecha = datetime.strptime(prod['Date_In'], '%Y-%m-%d')
+                prod['Date_In'] = fecha.strftime('%m/%d/%Y')
+            except Exception:
+                pass
 
     return render_template(
         'inventario.html',
@@ -80,19 +90,18 @@ def agregar():
                 "Date_In": request.form['Date_In'],
                 "QTY_Vol": request.form['QTY_Vol'],
                 "Unit": request.form['Unit'],
-                "Income": int(request.form['income']),
                 "STOCK": float(request.form['stock']),
                 "Qty_Per_Box": float(request.form['Qty_Per_Box']),
                 "Box_Available": float(request.form['Box_Available']),
                 "Maximum _Storage (Days)": float(request.form['Maximum_Storage_Days']),
-                "STATUS": True  # o False por defecto si no se usa en el formulario
+                "STATUS": True
             }
-
             collection.insert_one(nuevo_producto)
             return redirect('/inventario')
 
         except (KeyError, ValueError) as e:
-            return f"Error en los datos del formulario: {e}"
+            flash(f"Error en los datos del formulario: {e}", "danger")
+            return render_template('agregar.html')
 
     return render_template('agregar.html')
 
@@ -108,37 +117,64 @@ def editar(id):
 
     if request.method == 'POST':
         try:
-            # Obtener valores del formulario
-            income_original = int(request.form.get('income', 0))
-            add = int(request.form.get('add', 0))
-            lower = int(request.form.get('lower', 0))
-            income_actualizado = income_original + add - lower
+            stock_original = float(request.form.get('stock', 0))
+            add = float(request.form.get('add', 0))
+            lower = float(request.form.get('lower', 0))
+            stock_actualizado = round(stock_original + add - lower, 2)
+
+            # Aceptar formato m/d/Y (por Flatpickr) o Y-m-d (navegador)
+            try:
+                fecha_in = datetime.strptime(request.form['Date_In'], '%m/%d/%Y')
+            except ValueError:
+                try:
+                    fecha_in = datetime.strptime(request.form['Date_In'], '%Y-%m-%d')
+                except ValueError:
+                    flash("Error: Formato de fecha inválido", "danger")
+                    return redirect(url_for('editar', id=id))
+
+            if fecha_in.date() > datetime.now().date():
+                flash("Error: La fecha no puede ser futura.", "danger")
+                return redirect(url_for('editar', id=id))
+
+            date_in_str = fecha_in.strftime('%Y-%m-%d')
+
+            qty_vol = producto.get('QTY_Vol', 0)
 
             datos_actualizados = {
-                "LOT": request.form['lot'],
+                "LOT": request.form['LOT'],
                 "ListNumber": request.form['list_number'],
                 "Description": request.form['description'],
                 "Product_Type": request.form['product_type'],
                 "Located": request.form['located'],
-                "Date_In": request.form['Date_In'],
-                "QTY_Vol": request.form['QTY_Vol'],
+                "Date_In": date_in_str,
+                "QTY_Vol": qty_vol,
                 "Unit": request.form['Unit'],
-                "Income": income_actualizado,
-                "STOCK": float(request.form['stock']),
-                "Qty_Per_Box": request.form['Qty_Per_Box'],
-                "Box_Available": request.form['Box_Available'],
-                "Maximum _Storage (Days)": request.form['Maximum_Storage_Days'],
-                "STATUS": request.form.get('status') == 'on'
+                "STOCK": stock_actualizado,
+                "Qty_Per_Box": float(request.form['Qty_Per_Box']),
+                "Box_Available": float(request.form['Box_Available']),
+                "Maximum _Storage (Days)": float(request.form['Maximum_Storage_Days']),
+                "STATUS": True  # O mantener el valor anterior si no usas checkbox
             }
 
             collection.update_one({'_id': ObjectId(id)}, {'$set': datos_actualizados})
+            flash("Producto actualizado correctamente.", "success")
             return redirect('/inventario')
 
+        except (ValueError, KeyError) as e:
+            flash(f"Error en los datos ingresados: {e}", "danger")
+            return redirect(url_for('editar', id=id))
+
+    # Convertir fecha para mostrarla en el input si existe
+    if producto.get('Date_In'):
+        try:
+            fecha = datetime.strptime(producto['Date_In'], '%Y-%m-%d')
+            producto['Date_In'] = fecha.strftime('%Y-%m-%d')  # Para <input type="date">
         except ValueError:
-            return "Error en los datos ingresados"
+            pass
 
     return render_template('editar.html', producto=producto)
 
+        
 
 
 
@@ -149,6 +185,36 @@ def eliminar(id):
 
     collection.delete_one({'_id': ObjectId(id)})
     return redirect('/inventario')
+
+@app.route('/buscar_productos')
+def buscar_productos():
+    if 'usuario' not in session:
+        return jsonify([])
+
+    q = request.args.get('q', '')
+    filtro = {}
+    if q:
+        filtro = {
+            "$or": [
+                {"LOT": {"$regex": q, "$options": "i"}},
+                {"Description": {"$regex": q, "$options": "i"}},
+                {"ListNumber": {"$regex": q, "$options": "i"}},
+                {"Product_Type": {"$regex": q, "$options": "i"}},
+            ]
+        }
+
+    productos = list(collection.find(filtro).limit(50))
+
+    for prod in productos:
+        prod['_id'] = str(prod['_id'])
+        if 'Date_In' in prod:
+            try:
+                fecha = datetime.strptime(prod['Date_In'], '%Y-%m-%d')
+                prod['Date_In'] = fecha.strftime('%m/%d/%Y')
+            except Exception:
+                pass
+
+    return jsonify(productos)
 
 if __name__ == "__main__":
     app.run(debug=True)

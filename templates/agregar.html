@@ -34,12 +34,18 @@
         <div class="col-md-6">
           <label for="located" class="form-label">Located</label>
           <input type="text" class="form-control" name="located">
+        </div>   
+
+          <div class="col-md-6">
+        <label for="Date_In" class="form-label">Date-In</label>
+          <input type="date" class="form-control" name="Date_In" id="Date_In" 
+       value="{{ producto['Date_In'] if producto is defined else '' }}" 
+       max="">
+
+
+
         </div>
 
-        <div class="col-md-6">
-          <label for="Date_In" class="form-label">Date-In</label>
-          <input type="date" class="form-control" name="Date_In" id="Date_In">
-        </div>
 
         <div class="col-md-6">
           <label for="QTY_Vol" class="form-label">QTY Vol</label>
@@ -83,5 +89,13 @@
       </div>
     </form>
   </div>
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const today = new Date().toISOString().split("T")[0];
+    const dateInput = document.getElementById("Date_In");
+    dateInput.max = today;
+  });
+</script>
+
 </body>
 </html>

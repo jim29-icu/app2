@@ -4,6 +4,23 @@
   <meta charset="UTF-8">
   <title>Editar Producto</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <style>
+    .flatpickr-today-btn {
+      background-color: #0d6efd;
+      border: none;
+      color: white;
+      cursor: pointer;
+      border-radius: 3px;
+      font-weight: bold;
+      margin: 5px;
+      padding: 5px 10px;
+      align-self: center;
+    }
+    .flatpickr-today-btn:hover {
+      background-color: #0b5ed7;
+    }
+  </style>
 </head>
 <body class="bg-light">
   <div class="container mt-4">
@@ -11,76 +28,73 @@
 
     <form method="POST">
       <div class="row g-3">
+
         <div class="col-md-6">
-          <label for="lot" class="form-label">LOT</label>
-          <input type="text" class="form-control" name="lot" value="{{ producto['LOT'] }}" required>
+          <label class="form-label">LOT</label>
+          <input type="text" class="form-control" name="LOT" value="{{ producto['LOT'] }}" required>
         </div>
         <div class="col-md-6">
-          <label for="list_number" class="form-label">List Number</label>
+          <label class="form-label">List Number</label>
           <input type="text" class="form-control" name="list_number" value="{{ producto['ListNumber'] }}">
         </div>
 
         <div class="col-md-6">
-          <label for="description" class="form-label">Descripción</label>
+          <label class="form-label">Descripción</label>
           <input type="text" class="form-control" name="description" value="{{ producto['Description'] }}" required>
         </div>
         <div class="col-md-6">
-          <label for="product_type" class="form-label">Product Type</label>
+          <label class="form-label">Product Type</label>
           <input type="text" class="form-control" name="product_type" value="{{ producto['Product_Type'] }}">
         </div>
 
         <div class="col-md-6">
-          <label for="located" class="form-label">Located</label>
+          <label class="form-label">Located</label>
           <input type="text" class="form-control" name="located" value="{{ producto['Located'] }}">
         </div>
 
         <div class="col-md-6">
-          <label for="Date_In" class="form-label">Date-In</label>
-          <input type="date" class="form-control" name="Date_In" value="{{ producto['Date_In'] }}">
+          <label class="form-label">Date-In</label>
+          <input type="date" class="form-control" name="Date_In" id="Date_In" 
+                 value="{{ producto['Date_In'] | default('') }}" max="">
         </div>
 
         <div class="col-md-6">
-          <label for="QTY_Vol" class="form-label">QTY Vol</label>
+          <label class="form-label">QTY Vol</label>
           <input type="number" class="form-control" name="QTY_Vol" value="{{ producto['QTY_Vol'] }}" readonly>
         </div>
 
         <div class="col-md-4">
-          <label for="Unit" class="form-label">Unit</label>
+          <label class="form-label">Unit</label>
           <input type="text" class="form-control" name="Unit" value="{{ producto['Unit'] }}" required>
         </div>
 
         <div class="col-md-4">
-          <label for="income" class="form-label">Income</label>
-          <input type="number" name="income" class="form-control" value="{{ producto['Income'] }}" readonly>
-        </div>
-
-        <div class="col-md-4">
-          <label for="STOCK" class="form-label">STOCK</label>
+          <label class="form-label">STOCK</label>
           <input type="number" step="0.01" class="form-control" name="stock" value="{{ producto['STOCK'] }}" required>
         </div>
 
         <div class="col-md-4">
-          <label for="Qty_Per_Box" class="form-label">Qty_Per_Box</label>
+          <label class="form-label">Qty Per Box</label>
           <input type="number" step="0.01" class="form-control" name="Qty_Per_Box" value="{{ producto['Qty_Per_Box'] }}" required>
         </div>
 
         <div class="col-md-4">
-          <label for="Box_Available" class="form-label">Box_Available</label>
+          <label class="form-label">Box Available</label>
           <input type="number" step="0.01" class="form-control" name="Box_Available" value="{{ producto['Box_Available'] }}" required>
         </div>
 
         <div class="col-md-4">
-          <label for="Maximum_Storage_Days" class="form-label">Maximum Storage Days</label>
+          <label class="form-label">Maximum Storage Days</label>
           <input type="number" step="0.01" class="form-control" name="Maximum_Storage_Days" value="{{ producto['Maximum _Storage (Days)'] }}" required>
         </div>
 
         <div class="col-md-6">
-          <label for="add" class="form-label">Material Agregado</label>
+          <label class="form-label">Material Agregado</label>
           <input type="number" name="add" class="form-control" value="0">
         </div>
 
         <div class="col-md-6">
-          <label for="lower" class="form-label">Material Consumido</label>
+          <label class="form-label">Material Consumido</label>
           <input type="number" name="lower" class="form-control" value="0">
         </div>
       </div>
@@ -91,5 +105,13 @@
       </div>
     </form>
   </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const today = new Date().toISOString().split("T")[0];
+      const dateInput = document.getElementById("Date_In");
+      dateInput.max = today;
+    });
+  </script>
 </body>
 </html>

@@ -17,101 +17,182 @@
         <button type="submit" class="btn btn-primary w-100">Buscar</button>
       </div>
     </form>
-       <div class="text-center mt-4">
+
+    <div class="text-center mt-4">
       <a href="/logout" class="btn btn-outline-danger">Cerrar sesión</a>
     </div>
+
     <div class="mb-3 text-end">
       <a href="/agregar" class="btn btn-success">+ Agregar producto</a>
+      <button class="btn btn-outline-success ms-2" onclick="exportarExcel()">📥 Exportar a Excel</button>
     </div>
-   
-
 
     <div class="d-flex justify-content-center">
-  <table class="table table-bordered table-hover table-sm bg-white" style="width: auto;">
-    <thead class="table-dark">
-      <tr>
-        <th>LOT</th>
-        <th>List Number</th>
-        <th>Description</th>
-        <th>Product Type</th>
-        <th>Located</th>
-        <th>Date-In</th>
-        <th>QTY Vol</th>
-        <th>Unit</th>
-        <th>Income</th>
-        <th>STOCK</th>
-        <th>Qty_Per_Box</th>
-        <th>Box_Available</th>
-        <th>Maximum _Storage Days</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for item in productos %}
-      <tr>
-        <td>{{ item["LOT"] }}</td>
-        <td>{{ item["ListNumber"] }}</td>
-        <td>{{ item["Description"] }}</td>
-        <td>{{ item["Product_Type"] }}</td>
-        <td>{{ item["Located"] }}</td>
-        <td>{{ item["Date_In"] }}</td>
-        <td>{{ item["QTY_Vol"] }}</td>
-        <td>{{ item["Unit"] }}</td>
-        <td>{{ item["Income"] }}</td>
-        <td>{{ item["STOCK"] }}</td>
-        <td>{{ item["Qty_Per_Box"] }}</td>
-        <td>{{ item["Box_Available"] }}</td>
-        <td>{{ item["Maximum _Storage (Days)"] }}</td>
-       <td>
-  <div class="d-flex justify-content-center gap-2">
-    <a href="/editar/{{ item._id }}" class="btn btn-sm btn-outline-primary">Editar</a>
-    <a href="/eliminar/{{ item._id }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar este producto?')">Eliminar</a>
-  </div>
-</td>
+      <table id="tablaInventario" class="table table-bordered table-hover table-sm bg-white" style="width: auto;">
+        <thead class="table-dark">
+          <tr>
+            <th>LOT</th>
+            <th>List Number</th>
+            <th>Description</th>
+            <th>Product Type</th>
+            <th>Located</th>
+            <th>Date-In</th>
+            <th>QTY Vol</th>
+            <th>Unit</th>
+            <th>STOCK</th>
+            <th>Qty_Per_Box</th>
+            <th>Box_Available</th>
+            <th>Maximum _Storage Days</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in productos %}
+          <tr>
+            <td>{{ item["LOT"] }}</td>
+            <td>{{ item["ListNumber"] }}</td>
+            <td>{{ item["Description"] }}</td>
+            <td>{{ item["Product_Type"] }}</td>
+            <td>{{ item["Located"] }}</td>
+            <td>{{ item["Date_In"] }}</td>
+            <td>{{ item["QTY_Vol"] }}</td>
+            <td>{{ item["Unit"] }}</td>
+            <td>{{ item["STOCK"] }}</td>
+            <td>{{ item["Qty_Per_Box"] }}</td>
+            <td>{{ item["Box_Available"] }}</td>
+            <td>{{ item["Maximum _Storage (Days)"] }}</td>
+            <td>
+              <div class="d-flex justify-content-center gap-2">
+                <a href="/editar/{{ item._id }}" class="btn btn-sm btn-outline-primary">Editar</a>
+                <a href="/eliminar/{{ item._id }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar este producto?')">Eliminar</a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
 
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-
-
-        <!-- PAGINACIÓN -->
-<nav aria-label="Paginación del inventario">
-  <ul class="pagination justify-content-center">
-    <!-- Botón anterior -->
-    <li class="page-item {% if page <= 1 %}disabled{% endif %}">
-      <a class="page-link" href="?q={{ busqueda }}&page={{ page - 1 }}" tabindex="-1" aria-disabled="{{ 'true' if page <= 1 else 'false' }}">
-        &laquo; Anterior
-      </a>
-    </li>
-
-    <!-- Números de página -->
-    {% for p in range(1, total_paginas + 1) %}
-      {% if p == page %}
-        <li class="page-item active" aria-current="page">
-          <span class="page-link">{{ p }}</span>
+    <!-- Paginación -->
+    <nav aria-label="Paginación del inventario">
+      <ul class="pagination justify-content-center">
+        <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+          <a class="page-link" href="?q={{ busqueda }}&page={{ page - 1 }}" tabindex="-1" aria-disabled="{{ 'true' if page <= 1 else 'false' }}">
+            &laquo; Anterior
+          </a>
         </li>
-      {% elif p <= 2 or p > total_paginas - 2 or (p >= page - 1 and p <= page + 1) %}
-        <li class="page-item"><a class="page-link" href="?q={{ busqueda }}&page={{ p }}">{{ p }}</a></li>
-      {% elif p == 3 and page > 4 %}
-        <li class="page-item disabled"><span class="page-link">...</span></li>
-      {% elif p == total_paginas - 2 and page < total_paginas - 3 %}
-        <li class="page-item disabled"><span class="page-link">...</span></li>
-      {% endif %}
-    {% endfor %}
-
-    <!-- Botón siguiente -->
-    <li class="page-item {% if page >= total_paginas %}disabled{% endif %}">
-      <a class="page-link" href="?q={{ busqueda }}&page={{ page + 1 }}" aria-disabled="{{ 'true' if page >= total_paginas else 'false' }}">
-        Siguiente &raquo;
-      </a>
-    </li>
-  </ul>
-</nav>
-
-
- 
+        {% for p in range(1, total_paginas + 1) %}
+          {% if p == page %}
+            <li class="page-item active" aria-current="page">
+              <span class="page-link">{{ p }}</span>
+            </li>
+          {% elif p <= 2 or p > total_paginas - 2 or (p >= page - 1 and p <= page + 1) %}
+            <li class="page-item"><a class="page-link" href="?q={{ busqueda }}&page={{ p }}">{{ p }}</a></li>
+          {% elif p == 3 and page > 4 %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+          {% elif p == total_paginas - 2 and page < total_paginas - 3 %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+          {% endif %}
+        {% endfor %}
+        <li class="page-item {% if page >= total_paginas %}disabled{% endif %}">
+          <a class="page-link" href="?q={{ busqueda }}&page={{ page + 1 }}" aria-disabled="{{ 'true' if page >= total_paginas else 'false' }}">
+            Siguiente &raquo;
+          </a>
+        </li>
+      </ul>
+    </nav>
   </div>
+
+  <!-- Búsqueda AJAX -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const inputBusqueda = document.querySelector('input[name="q"]');
+      const tablaCuerpo = document.querySelector('tbody');
+      const urlBuscar = '/buscar_productos';
+
+      let timeout = null;
+
+      inputBusqueda.addEventListener('input', () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          const valor = inputBusqueda.value.trim();
+          if (valor.length === 0) {
+            window.location.href = '/inventario';
+            return;
+          }
+
+          fetch(`${urlBuscar}?q=${encodeURIComponent(valor)}`)
+            .then(response => response.json())
+            .then(data => {
+              tablaCuerpo.innerHTML = '';
+
+              if (data.length === 0) {
+                tablaCuerpo.innerHTML = '<tr><td colspan="14" class="text-center">No se encontraron productos</td></tr>';
+                return;
+              }
+
+              data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                  <td>${item.LOT || ''}</td>
+                  <td>${item.ListNumber || ''}</td>
+                  <td>${item.Description || ''}</td>
+                  <td>${item.Product_Type || ''}</td>
+                  <td>${item.Located || ''}</td>
+                  <td>${item.Date_In || ''}</td>
+                  <td>${item.QTY_Vol || ''}</td>
+                  <td>${item.Unit || ''}</td>
+                  <td>${item.STOCK || ''}</td>
+                  <td>${item.Qty_Per_Box || ''}</td>
+                  <td>${item.Box_Available || ''}</td>
+                  <td>${item["Maximum _Storage (Days)"] || ''}</td>
+                  <td>
+                    <div class="d-flex justify-content-center gap-2">
+                      <a href="/editar/${item._id}" class="btn btn-sm btn-outline-primary">Editar</a>
+                      <a href="/eliminar/${item._id}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar este producto?')">Eliminar</a>
+                    </div>
+                  </td>
+                `;
+                tablaCuerpo.appendChild(row);
+              });
+            })
+            .catch(err => {
+              console.error('Error buscando productos:', err);
+            });
+        }, 300);
+      });
+    });
+  </script>
+
+  <!-- Librería SheetJS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <!-- Función de exportación -->
+  <script>
+  function exportarExcel() {
+    const tablaOriginal = document.getElementById("tablaInventario");
+
+    // Clonar la tabla sin modificar la original
+    const tablaClonada = tablaOriginal.cloneNode(true);
+
+    // Eliminar la última columna (Actions) del <thead>
+    const ths = tablaClonada.querySelectorAll("thead th");
+    if (ths.length > 0) {
+      ths[ths.length - 1].remove();
+    }
+
+    // Eliminar la última celda de cada fila del <tbody>
+    const filas = tablaClonada.querySelectorAll("tbody tr");
+    filas.forEach(fila => {
+      fila.removeChild(fila.lastElementChild);
+    });
+
+    // Convertir la tabla modificada a Excel
+    const wb = XLSX.utils.table_to_book(tablaClonada, { sheet: "Inventario" });
+    XLSX.writeFile(wb, "inventario.xlsx");
+  }
+</script>
+
+
 </body>
 </html>
