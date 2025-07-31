@@ -66,7 +66,8 @@ def inventario():
         productos=productos,
         busqueda=busqueda,
         page=page,
-        total_paginas=total_paginas
+        total_paginas=total_paginas,
+         active_tab='inventario'
     )
 
 @app.route('/logout')
@@ -173,6 +174,11 @@ def editar(id):
             pass
 
     return render_template('editar.html', producto=producto)
+
+@app.route('/equipos')
+def equipos():
+    return render_template('equipos.html', active_tab='equipos')
+
 
         
 
