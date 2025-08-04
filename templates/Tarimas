@@ -55,6 +55,7 @@
           <a class="nav-link {% if active_tab == 'Tarimas' %}active{% endif %}" href="/Tarimas">Tarimas</a>
         </li>
       </ul>
+      
       <a href="/logout" class="btn btn-outline-danger btn-sm">Cerrar sesión</a>
     </div>
   </div>
