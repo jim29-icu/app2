@@ -8,11 +8,11 @@
 
 
 </head>
-
+{% include "base.html" %}
 
 
 <body>
-  {% include "base.html" %}
+  
 
 <script>
 function ajustarFilasPorPagina() {
@@ -40,15 +40,7 @@ window.addEventListener('load', ajustarFilasPorPagina);
 // window.addEventListener('resize', ajustarFilasPorPagina); /* opcional */
 </script>
 
-<header>
-  <div><strong>Menú</strong></div>
-  <nav>
-    <a href="/inventario">Inventario</a>
-    <a href="/equipos">Equipos</a>
-    <a href="/tarimas">Tarimas</a>
-    <a href="/logout">Cerrar sesión</a>
-  </nav>
-</header>
+
 
 <h1 class="titulo-principal">ICU Medical - Product for PMC Inventory</h1>
 

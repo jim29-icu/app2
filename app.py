@@ -82,7 +82,7 @@ def inventario():
 
 @app.route('/Tarimas')
 def tarimas():
-    return render_template('tarimas.html', active_tab='Tarimas')
+    return render_template('Tarimas.html', active_tab='Tarimas')
 
 
 
