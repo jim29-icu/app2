@@ -2,218 +2,233 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Inventario</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Inventario PMC</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+
+
+
 </head>
-<body class="bg-light">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">Mi Inventario</a>
-    <div class="collapse navbar-collapse justify-content-end">
-      <ul class="navbar-nav me-3">
-        <li class="nav-item">
-          <a class="nav-link {% if active_tab == 'inventario' %}active{% endif %}" href="/inventario">Inventario</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link {% if active_tab == 'equipos' %}active{% endif %}" href="/equipos">Equipos</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link {% if active_tab == 'Tarimas' %}active{% endif %}" href="/Tarimas">Tarimas</a>
-        </li>
-      </ul>
-      <a href="/logout" class="btn btn-outline-danger btn-sm">Cerrar sesión</a>
+
+</head>
+<body>
+
+<script>
+function ajustarFilasPorPagina() {
+  const altoVentana = window.innerHeight;
+  const altoHeader = document.querySelector('header').offsetHeight;
+  const altoTitulo = document.querySelector('.titulo-principal').offsetHeight;
+  const altoAcciones = document.querySelector('.acciones-superiores').offsetHeight;
+  const altoFila = 30;  // altura aproximada de cada fila en píxeles
+
+  const alturaDisponible = altoVentana - altoHeader - altoTitulo - altoAcciones - 100; // margen extra
+  let filas = Math.floor(alturaDisponible / altoFila);
+  filas = Math.max(5, Math.min(filas, 16)); // mínimo 5, máximo 16 filas
+
+  const url = new URL(window.location.href);
+  const actualPorPagina = url.searchParams.get('por_pagina');
+
+  if (actualPorPagina != filas.toString()) {
+    url.searchParams.set('por_pagina', filas);
+    url.searchParams.set('page', 1);
+    window.location.href = url.toString();
+  }
+}
+
+window.addEventListener('load', ajustarFilasPorPagina);
+// window.addEventListener('resize', ajustarFilasPorPagina); /* opcional */
+</script>
+
+<header>
+  <div><strong>Menú</strong></div>
+  <nav>
+    <a href="/inventario">Inventario</a>
+    <a href="/equipos">Equipos</a>
+    <a href="/tarimas">Tarimas</a>
+    <a href="/logout">Cerrar sesión</a>
+  </nav>
+</header>
+
+<h1 class="titulo-principal">ICU Medical - Product for PMC Inventory</h1>
+
+<div class="container">
+  <div class="acciones-superiores">
+    <input type="text" id="buscador" placeholder="Buscar en la tabla..." value="{{ busqueda }}">
+    
+
+    <div class="botones-acciones">
+      <button class="boton-agregar" onclick="window.location.href='/agregar'">Agregar Producto</button>
+      <button class="boton-exportar" onclick="exportarExcel()">Exportar a Excel</button>
     </div>
   </div>
-</nav>
 
+  <!-- NUEVO: contenedor con scroll y altura limitada -->
+  <div class="tabla-scroll-container">
+    <table id="tabla-inventario">
+      <thead>
+        <tr>
+          <th>LOT</th>
+          <th>List Number</th>
+          <th>Description</th>
+          <th>Product Type</th>
+          <th>Located</th>
+          <th>Date-In</th>
+          <th>Qty Vol.</th>
+          <th>Unit</th>
+          <th>Income</th>
+          <th>Spent</th>
+          <th class="stock">STOCK</th>
+          <th>Qty Per Box</th>
+          <th>Box Available</th>
+          <th>Max Storage (Days)</th>
+          <th>Due Date</th>
+          <th>Days Available</th>
+          <th>Status</th>
+          <th>Note</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for producto in productos %}
+        <tr>
+          <td>{{ producto.LOT | default('--')}}</td>
+          <td>{{ producto.ListNumber| default('--') }}</td>
+          <td>{{ producto.Description| default('--') }}</td>
+          <td>{{ producto.Product_Type| default('--') }}</td>
+          <td>{{ producto.Located| default('--') }}</td>
+          <td>{{ producto.Date_In| default('--') }}</td>
+          <td>{{ producto.QTY_Vol| default('--') }}</td>
+          <td>{{ producto.Unit| default('--') }}</td>
+          <td>{{ producto.Income if producto.Income is defined else '' }}</td>
+          <td>{{ producto.Spent if producto.Spent is defined else '' }}</td>
+          <td class="stock {% if producto.STOCK|int <= 0 %}agotado{% endif %}">
+            {% if producto.STOCK|int <= 0 %}
+              Agotado
+            {% else %}
+              {{ producto.STOCK }}
+            {% endif %}
+          </td>
+          <td>{{ producto.Qty_Per_Box| default('--') }}</td>
+          <td>{{ producto.Box_Available| default('--') }}</td>
+          <td>{{ producto.Maximum_Storage_Days| default('--') }}</td>
+          <td>{{ producto.Due_Date| default('--') }}</td>
+          <td>{{ producto.Days_Available| default('--') }}</td>
+          <td>{{ producto.Status| default('--') }}</td>
+          <td>{{ producto.Note | default('--')}}</td>
+          <td class="acciones-btn">
+  <a href="{{ url_for('editar', id=producto._id) }}" class="btn-editar">Editar</a>
+  <button class="btn-eliminar" onclick="confirmarEliminacion('{{ producto._id }}')">Eliminar</button>
 
+</td>
 
-
-  <div class="container mt-4">
-    <h2 class="mb-4 text-center">Inventario - Stock</h2>
-
-    <form method="GET" class="row mb-4">
-      <div class="col-md-10">
-        <input type="text" name="q" value="{{ busqueda }}" class="form-control" placeholder="Buscar por descripción, lote, producto...">
-      </div>
-      <div class="col-md-2">
-        <button type="submit" class="btn btn-primary w-100">Buscar</button>
-      </div>
-    </form>
-
-  
-
-    <div class="mb-3 text-end">
-      <a href="/agregar" class="btn btn-success">+ Agregar producto</a>
-      <button class="btn btn-outline-success ms-2" onclick="exportarExcel()">📥 Exportar a Excel</button>
-    </div>
-
-    <div class="d-flex justify-content-center">
-      <table id="tablaInventario" class="table table-bordered table-hover table-sm bg-white" style="width: auto;">
-        <thead class="table-dark">
-          <tr>
-            <th>LOT</th>
-            <th>List Number</th>
-            <th>Description</th>
-            <th>Product Type</th>
-            <th>Located</th>
-            <th>Date-In</th>
-            <th>QTY Vol</th>
-            <th>Unit</th>
-            <th>STOCK</th>
-            <th>Qty_Per_Box</th>
-            <th>Box_Available</th>
-            <th>Maximum _Storage Days</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for item in productos %}
-          <tr>
-            <td>{{ item["LOT"] }}</td>
-            <td>{{ item["ListNumber"] }}</td>
-            <td>{{ item["Description"] }}</td>
-            <td>{{ item["Product_Type"] }}</td>
-            <td>{{ item["Located"] }}</td>
-            <td>{{ item["Date_In"] }}</td>
-            <td>{{ item["QTY_Vol"] }}</td>
-            <td>{{ item["Unit"] }}</td>
-            <td>{{ item["STOCK"] }}</td>
-            <td>{{ item["Qty_Per_Box"] }}</td>
-            <td>{{ item["Box_Available"] }}</td>
-            <td>{{ item["Maximum _Storage (Days)"] }}</td>
-            <td>
-              <div class="d-flex justify-content-center gap-2">
-                <a href="/editar/{{ item._id }}" class="btn btn-sm btn-outline-primary">Editar</a>
-                <a href="/eliminar/{{ item._id }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar este producto?')">Eliminar</a>
-              </div>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Paginación -->
-    <nav aria-label="Paginación del inventario">
-      <ul class="pagination justify-content-center">
-        <li class="page-item {% if page <= 1 %}disabled{% endif %}">
-          <a class="page-link" href="?q={{ busqueda }}&page={{ page - 1 }}" tabindex="-1" aria-disabled="{{ 'true' if page <= 1 else 'false' }}">
-            &laquo; Anterior
-          </a>
-        </li>
-        {% for p in range(1, total_paginas + 1) %}
-          {% if p == page %}
-            <li class="page-item active" aria-current="page">
-              <span class="page-link">{{ p }}</span>
-            </li>
-          {% elif p <= 2 or p > total_paginas - 2 or (p >= page - 1 and p <= page + 1) %}
-            <li class="page-item"><a class="page-link" href="?q={{ busqueda }}&page={{ p }}">{{ p }}</a></li>
-          {% elif p == 3 and page > 4 %}
-            <li class="page-item disabled"><span class="page-link">...</span></li>
-          {% elif p == total_paginas - 2 and page < total_paginas - 3 %}
-            <li class="page-item disabled"><span class="page-link">...</span></li>
-          {% endif %}
+        </tr>
         {% endfor %}
-        <li class="page-item {% if page >= total_paginas %}disabled{% endif %}">
-          <a class="page-link" href="?q={{ busqueda }}&page={{ page + 1 }}" aria-disabled="{{ 'true' if page >= total_paginas else 'false' }}">
-            Siguiente &raquo;
-          </a>
-        </li>
-      </ul>
-    </nav>
+      </tbody>
+    </table>
+
+    <div class="paginacion" style="margin-top: 10px; text-align: center;">
+      {% if total_paginas > 1 %}
+        <nav aria-label="Page navigation">
+          <ul style="list-style: none; display: inline-flex; padding: 0; gap: 5px;">
+            <li>
+              {% if page > 1 %}
+                <a href="{{ url_for('inventario', page=page-1, por_pagina=por_pagina, q=busqueda) }}" style="padding: 5px 10px; border: 1px solid #0072c6; color: #0072c6; text-decoration: none; border-radius: 5px;">Anterior</a>
+              {% else %}
+                <span style="padding: 5px 10px; border: 1px solid #ccc; color: #ccc; border-radius: 5px; cursor: not-allowed;">Anterior</span>
+              {% endif %}
+            </li>
+
+            {% for p in range(1, total_paginas + 1) %}
+              {% if p == page %}
+                <li><span style="padding: 5px 10px; background-color: #0072c6; color: white; border-radius: 5px;">{{ p }}</span></li>
+              {% elif p >= page - 2 and p <= page + 2 %}
+                <li><a href="{{ url_for('inventario', page=p, por_pagina=por_pagina, q=busqueda) }}" style="padding: 5px 10px; border: 1px solid #0072c6; color: #0072c6; text-decoration: none; border-radius: 5px;">{{ p }}</a></li>
+              {% elif p == 1 or p == total_paginas %}
+                <li><a href="{{ url_for('inventario', page=p, por_pagina=por_pagina, q=busqueda) }}" style="padding: 5px 10px; border: 1px solid #0072c6; color: #0072c6; text-decoration: none; border-radius: 5px;">{{ p }}</a></li>
+              {% elif p == page - 3 or p == page + 3 %}
+                <li><span style="padding: 5px 10px;">...</span></li>
+              {% endif %}
+            {% endfor %}
+
+            <li>
+              {% if page < total_paginas %}
+                <a href="{{ url_for('inventario', page=page+1, por_pagina=por_pagina, q=busqueda) }}" style="padding: 5px 10px; border: 1px solid #0072c6; color: #0072c6; text-decoration: none; border-radius: 5px;">Siguiente</a>
+              {% else %}
+                <span style="padding: 5px 10px; border: 1px solid #ccc; color: #ccc; border-radius: 5px; cursor: not-allowed;">Siguiente</span>
+              {% endif %}
+            </li>
+          </ul>
+        </nav>
+      {% endif %}
+    </div>
   </div>
 
-  <!-- Búsqueda AJAX -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const inputBusqueda = document.querySelector('input[name="q"]');
-      const tablaCuerpo = document.querySelector('tbody');
-      const urlBuscar = '/buscar_productos';
+</div>
 
-      let timeout = null;
+<script>
+  // Búsqueda dinámica
+// Búsqueda dinámica con debounce para no perder el cursor
 
-      inputBusqueda.addEventListener('input', () => {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-          const valor = inputBusqueda.value.trim();
-          if (valor.length === 0) {
-            window.location.href = '/inventario';
-            return;
-          }
+document.getElementById('buscador').addEventListener('input', function () {
+  const query = this.value.trim();
 
-          fetch(`${urlBuscar}?q=${encodeURIComponent(valor)}`)
-            .then(response => response.json())
-            .then(data => {
-              tablaCuerpo.innerHTML = '';
+  // Si el input está vacío, enviar q vacío para traer todo
+  fetch(`/inventario?q=${encodeURIComponent(query)}`)
+    .then(response => response.text())
+    .then(html => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
 
-              if (data.length === 0) {
-                tablaCuerpo.innerHTML = '<tr><td colspan="14" class="text-center">No se encontraron productos</td></tr>';
-                return;
-              }
+      // Actualiza el tbody con los nuevos datos
+      const nuevoTbody = doc.querySelector('#tabla-inventario tbody');
+      const tbodyActual = document.querySelector('#tabla-inventario tbody');
+      if (nuevoTbody && tbodyActual) {
+        tbodyActual.innerHTML = nuevoTbody.innerHTML;
+      }
 
-              data.forEach(item => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                  <td>${item.LOT || ''}</td>
-                  <td>${item.ListNumber || ''}</td>
-                  <td>${item.Description || ''}</td>
-                  <td>${item.Product_Type || ''}</td>
-                  <td>${item.Located || ''}</td>
-                  <td>${item.Date_In || ''}</td>
-                  <td>${item.QTY_Vol || ''}</td>
-                  <td>${item.Unit || ''}</td>
-                  <td>${item.STOCK || ''}</td>
-                  <td>${item.Qty_Per_Box || ''}</td>
-                  <td>${item.Box_Available || ''}</td>
-                  <td>${item["Maximum _Storage (Days)"] || ''}</td>
-                  <td>
-                    <div class="d-flex justify-content-center gap-2">
-                      <a href="/editar/${item._id}" class="btn btn-sm btn-outline-primary">Editar</a>
-                      <a href="/eliminar/${item._id}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar este producto?')">Eliminar</a>
-                    </div>
-                  </td>
-                `;
-                tablaCuerpo.appendChild(row);
-              });
-            })
-            .catch(err => {
-              console.error('Error buscando productos:', err);
-            });
-        }, 300);
-      });
-    });
-  </script>
+      // Actualiza la paginación
+      const nuevaPaginacion = doc.querySelector('.paginacion');
+      const paginacionActual = document.querySelector('.paginacion');
+      if (nuevaPaginacion && paginacionActual) {
+        paginacionActual.innerHTML = nuevaPaginacion.innerHTML;
+      }
+    })
+    .catch(err => console.error('Error en la búsqueda:', err));
+});
 
-  <!-- Librería SheetJS -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-  <!-- Función de exportación -->
-  <script>
+
+
+  // Exportar a Excel con SheetJS
   function exportarExcel() {
-    const tablaOriginal = document.getElementById("tablaInventario");
-
-    // Clonar la tabla sin modificar la original
-    const tablaClonada = tablaOriginal.cloneNode(true);
-
-    // Eliminar la última columna (Actions) del <thead>
-    const ths = tablaClonada.querySelectorAll("thead th");
-    if (ths.length > 0) {
-      ths[ths.length - 1].remove();
-    }
-
-    // Eliminar la última celda de cada fila del <tbody>
-    const filas = tablaClonada.querySelectorAll("tbody tr");
-    filas.forEach(fila => {
-      fila.removeChild(fila.lastElementChild);
-    });
-
-    // Convertir la tabla modificada a Excel
-    const wb = XLSX.utils.table_to_book(tablaClonada, { sheet: "Inventario" });
-    XLSX.writeFile(wb, "inventario.xlsx");
+    const table = document.getElementById('tabla-inventario');
+    const wb = XLSX.utils.table_to_book(table, {sheet: "Inventario"});
+    XLSX.writeFile(wb, 'inventario_pmc.xlsx');
   }
 </script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+  function confirmarEliminacion(id) {
+    if (confirm("¿Estás seguro de que quieres eliminar este producto?")) {
+      fetch(`/eliminar/${id}`, {
+        method: 'POST'
+      }).then(response => {
+        if (response.redirected) {
+          window.location.href = response.url; // redirige al inventario
+        } else {
+          alert('Error al eliminar');
+        }
+      }).catch(error => {
+        console.error('Error:', error);
+        alert('Error al eliminar');
+      });
+    }
+  }
+</script>
+
 
 
 </body>

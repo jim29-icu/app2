@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Inventario PMC</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      margin: 20px;
+    }
+    h1 {
+      background-color: #0072c6;
+      color: white;
+      padding: 10px;
+      text-align: center;
+    }
+    #buscador {
+      width: 100%;
+      padding: 10px;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 12px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 5px;
+      text-align: center;
+    }
+    th {
+      background-color: #cfe2f3;
+    }
+    .agotado {
+      background-color: red;
+      color: white;
+      font-weight: bold;
+    }
+    .stock {
+      background-color: #b6d7a8;
+    }
+    .center {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<h1>ICU Medical - Product for PMC Inventory</h1>
+
+<input type="text" id="buscador" placeholder="Buscar en la tabla...">
+
+<table id="tabla-inventario">
+  <thead>
+    <tr>
+      <th>LOT</th>
+      <th>List Number</th>
+      <th>Description</th>
+      <th>Product Type</th>
+      <th>Located</th>
+      <th>Date-In</th>
+      <th>Qty Vol.</th>
+      <th>Unit</th>
+      <th>Income</th>
+      <th>Spent</th>
+      <th class="stock">STOCK</th>
+      <th>Qty Per Box</th>
+      <th>Box Available</th>
+      <th>Max Storage (Days)</th>
+      <th>Due Date</th>
+      <th>Days Available</th>
+      <th>Status</th>
+      <th>Note</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1003331</td>
+      <td>301604</td>
+      <td>BD 10 ml Syringe Slip Tip</td>
+      <td>Syringe</td>
+      <td>B2</td>
+      <td>10/24/2024</td>
+      <td>1</td>
+      <td>EA</td>
+      <td>96</td>
+      <td>0</td>
+      <td class="stock">96</td>
+      <td>48</td>
+      <td>2.00</td>
+      <td>284</td>
+      <td>---</td>
+      <td>---</td>
+      <td>---</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Filter 10014924-001</td>
+      <td>---</td>
+      <td>Pigtail Filter</td>
+      <td>CADD Consumables</td>
+      <td>B3-T5</td>
+      <td>10/31/2024</td>
+      <td>1</td>
+      <td>EA</td>
+      <td>1300</td>
+      <td>1300</td>
+      <td class="agotado">Agotado</td>
+      <td>130</td>
+      <td>0</td>
+      <td>277</td>
+      <td>---</td>
+      <td>---</td>
+      <td>---</td>
+      <td></td>
+    </tr>
+    <!-- Puedes agregar más filas aquí -->
+  </tbody>
+</table>
+
+<script>
+  document.getElementById('buscador').addEventListener('input', function () {
+    const filtro = this.value.toLowerCase();
+    const filas = document.querySelectorAll('#tabla-inventario tbody tr');
+
+    filas.forEach(fila => {
+      const textoFila = fila.textContent.toLowerCase();
+      fila.style.display = textoFila.includes(filtro) ? '' : 'none';
+    });
+  });
+</script>
+
+</body>
+</html>

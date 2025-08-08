@@ -27,6 +27,8 @@ def login():
         return redirect('/inventario')
     return 'Usuario o contraseña incorrectos'
 
+
+
 @app.route('/inventario')
 def inventario():
     if 'usuario' not in session:
@@ -34,7 +36,12 @@ def inventario():
 
     busqueda = request.args.get('q', '')
     page = int(request.args.get('page', 1))
-    por_pagina = 10
+    por_pagina = request.args.get('por_pagina', None)
+
+    try:
+        por_pagina = int(por_pagina)
+    except (TypeError, ValueError):
+        por_pagina = 16  # default
 
     filtro = {}
     if busqueda:
@@ -67,8 +74,17 @@ def inventario():
         busqueda=busqueda,
         page=page,
         total_paginas=total_paginas,
-         active_tab='inventario'
+        por_pagina=por_pagina,
+        active_tab='inventario'
     )
+
+
+
+@app.route('/Tarimas')
+def tarimas():
+    return render_template('tarimas.html', active_tab='Tarimas')
+
+
 
 @app.route('/logout')
 def logout():
@@ -89,12 +105,16 @@ def agregar():
                 "Product_Type": request.form['product_type'],
                 "Located": request.form['located'],
                 "Date_In": request.form['Date_In'],
-                "QTY_Vol": request.form['QTY_Vol'],
+                "QTY_Vol": float(request.form['QTY_Vol']) if request.form['QTY_Vol'] else 0,
                 "Unit": request.form['Unit'],
-                "STOCK": float(request.form['stock']),
-                "Qty_Per_Box": float(request.form['Qty_Per_Box']),
-                "Box_Available": float(request.form['Box_Available']),
-                "Maximum _Storage (Days)": float(request.form['Maximum_Storage_Days']),
+                "STOCK": float(request.form['stock']) if request.form['stock'] else 0,
+                "Qty_Per_Box": float(request.form['Qty_Per_Box']) if request.form['Qty_Per_Box'] else 0,
+                "Box_Available": float(request.form['Box_Available']) if request.form['Box_Available'] else 0,
+                "Maximum_Storage_Days": float(request.form['Maximum_Storage_Days']) if request.form['Maximum_Storage_Days'] else 0,
+                "Due_Date": request.form['Due_Date'] if request.form['Due_Date'] else None,
+                "Days_Available": int(request.form['Days_Available']) if request.form['Days_Available'] else 0,
+                "Status": request.form['Status'],
+                "Note": request.form['Note'],
                 "STATUS": True
             }
             collection.insert_one(nuevo_producto)
@@ -105,6 +125,7 @@ def agregar():
             return render_template('agregar.html')
 
     return render_template('agregar.html')
+
 
 
 @app.route('/editar/<id>', methods=['GET', 'POST'])
@@ -180,11 +201,12 @@ def equipos():
     return render_template('equipos.html', active_tab='equipos')
 
 
+
         
 
 
 
-@app.route('/eliminar/<id>')
+@app.route('/eliminar/<id>',methods=['POST'])
 def eliminar(id):
     if 'usuario' not in session:
         return redirect('/')

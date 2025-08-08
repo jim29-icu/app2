@@ -1,0 +1,138 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f6f8;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background-color: #0072c6;
+  color: white;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header nav a {
+  color: white;
+  margin-left: 20px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+header nav a:hover {
+  text-decoration: underline;
+}
+
+h1.titulo-principal {
+  color: #161515;
+  text-align: center;
+  margin: 0;
+  padding: 20px 0;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.container {
+  padding: 20px;
+}
+
+.acciones-superiores {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+
+#buscador {
+  flex: 1;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  min-width: 200px;
+}
+
+.botones-acciones button {
+  padding: 10px 20px;
+  font-size: 14px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  color: white;
+}
+
+.boton-agregar {
+  background-color: #28a745;
+}
+
+.boton-exportar {
+  background-color: #007bff;
+}
+
+/* Nuevo: contenedor con scroll y altura limitada */
+.tabla-scroll-container {
+  max-height: calc(100vh - 180px);
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 5px;
+  text-align: center;
+}
+
+/* Header sticky */
+#tabla-inventario thead th {
+  position: sticky;
+  top: 0;
+  background-color: #cfe2f3;
+  z-index: 5;
+  border-bottom: 2px solid #0072c6;
+}
+
+.agotado {
+  background-color: red;
+  color: white;
+  font-weight: bold;
+}
+
+.stock {
+  background-color: #b6d7a8;
+}
+
+.acciones-btn {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.acciones-btn button,
+.acciones-btn a {
+  padding: 5px 8px;
+  font-size: 11px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-editar {
+  background-color: #ffc107;
+  color: black;
+}
+
+.btn-eliminar {
+  background-color: #dc3545;
+  color: white;
+}
