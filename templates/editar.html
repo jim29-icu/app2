@@ -70,7 +70,11 @@
 
         <div class="col-md-4">
           <label class="form-label">STOCK</label>
-          <input type="number" step="0.01" class="form-control" name="stock" value="{{ producto['STOCK'] }}" required>
+          <input type="number" step="0.01" class="form-control" name="stock" value="{{ producto['STOCK'] }}" readonly>
+          <div class="form-text text-warning">
+    ⚠ Este campo es calculado y no puede ser editado.
+  </div>
+          
         </div>
 
         <div class="col-md-4">
@@ -80,12 +84,18 @@
 
         <div class="col-md-4">
           <label class="form-label">Box Available</label>
-          <input type="number" step="0.01" class="form-control" name="Box_Available" value="{{ producto['Box_Available'] }}" required>
+          <input type="number" step="0.01" class="form-control" name="Box_Available" value="{{ producto['Box_Available'] }}" readonly>
+          <div class="form-text text-warning">
+    ⚠ Este campo es calculado y no puede ser editado.
+  </div>
         </div>
 
         <div class="col-md-4">
           <label class="form-label">Maximum Storage Days</label>
           <input type="number" step="0.01" class="form-control" name="Maximum_Storage_Days" value="{{ producto['Maximum _Storage (Days)'] }}" required>
+          <div class="form-text text-warning">
+    ⚠ Este campo es calculado y no puede ser editado.
+  </div>
         </div>
 
         <div class="col-md-6">
@@ -104,22 +114,22 @@
 
            <div class="col-md-6">
           <label class="form-label">Due Date</label>
-          <input type="date" name="Due_Date" class="form-control" value="0">
+          <input type="date" name="Due_Date" class="form-control" value="{{ producto['Due_Date'] }}">
         </div>
 
          <div class="col-md-6">
           <label class="form-label">Days Available</label>
-          <input type="number" name="Days_Available" class="form-control" value="0">
+          <input type="number" name="Days_Available" class="form-control" value="{{ producto['Days_Available'] }}" readonly>
         </div>
 
          <div class="col-md-6">
           <label class="form-label">Status</label>
-          <input type="text" name="Status" class="form-control" value="--">
+          <input type="text" name="Status" class="form-control" value="{{ producto['Status'] }}">
         </div>
 
          <div class="col-md-6">
           <label class="form-label">Note</label>
-          <input type="text" name="Note" class="form-control" value="0">
+          <input type="text" name="Note" class="form-control" value="{{ producto['Note'] }}">
         </div>
 
 

@@ -91,6 +91,10 @@ def logout():
     session.pop('usuario', None)
     return redirect('/')
 
+
+
+
+
 @app.route('/agregar', methods=['GET', 'POST'])
 def agregar():
     if 'usuario' not in session:
@@ -125,6 +129,9 @@ def agregar():
             return render_template('agregar.html')
 
     return render_template('agregar.html')
+
+
+
 
 
 
@@ -175,7 +182,8 @@ def editar(id):
                 "Qty_Per_Box": float(request.form['Qty_Per_Box']),
                 "Box_Available": float(request.form['Box_Available']),
                 "Maximum _Storage (Days)": float(request.form['Maximum_Storage_Days']),
-                "STATUS": True  # O mantener el valor anterior si no usas checkbox
+                "STATUS": True,  # O mantener el valor anterior si no usas checkbox
+                "Note": request.form['Note']
             }
 
             collection.update_one({'_id': ObjectId(id)}, {'$set': datos_actualizados})
