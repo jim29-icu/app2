@@ -167,6 +167,11 @@ def editar(id):
 
             date_in_str = fecha_in.strftime('%Y-%m-%d')
 
+            qty_per_box = float(request.form['Qty_Per_Box'])
+
+            # Calcular Box_Available redondeado a 1 decimal
+            box_available = round(stock_actualizado / qty_per_box, 1) if qty_per_box > 0 else 0
+
             qty_vol = producto.get('QTY_Vol', 0)
 
             datos_actualizados = {
@@ -179,8 +184,8 @@ def editar(id):
                 "QTY_Vol": qty_vol,
                 "Unit": request.form['Unit'],
                 "STOCK": stock_actualizado,
-                "Qty_Per_Box": float(request.form['Qty_Per_Box']),
-                "Box_Available": float(request.form['Box_Available']),
+                "Qty_Per_Box": qty_per_box,
+                "Box_Available": box_available,
                 "Maximum _Storage (Days)": float(request.form['Maximum_Storage_Days']),
                 "STATUS": True,  # O mantener el valor anterior si no usas checkbox
                 "Note": request.form['Note']
@@ -203,6 +208,7 @@ def editar(id):
             pass
 
     return render_template('editar.html', producto=producto)
+
 
 @app.route('/equipos')
 def equipos():
