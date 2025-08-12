@@ -203,7 +203,7 @@
 
       <div class="col-md-4">
         <label for="Box_Available">Box Available</label>
-        <input type="number" step="0.01" name="Box_Available" id="Box_Available" required />
+        <input type="number" step="0.01" name="Box_Available" id="Box_Available" readonly />
       </div>
 
       <div class="col-md-4">
@@ -240,6 +240,8 @@
   </form>
 </div>
 
+
+
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const today = new Date().toISOString().split("T")[0];
@@ -247,6 +249,35 @@
     document.getElementById("Due_Date").min = today; // Por si quieres evitar fechas vencidas al agregar
   });
 </script>
+
+<!-- calculo de Box_Available -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const today = new Date().toISOString().split("T")[0];
+    document.getElementById("Date_In").max = today;
+    document.getElementById("Due_Date").min = today; // Evitar fechas vencidas
+
+    const stockInput = document.getElementById("stock");
+    const qtyPerBoxInput = document.getElementById("Qty_Per_Box");
+    const boxAvailableInput = document.getElementById("Box_Available");
+
+    function calcularBoxAvailable() {
+      const stock = parseFloat(stockInput.value) || 0;
+      const qtyPerBox = parseFloat(qtyPerBoxInput.value) || 0;
+      
+      if (qtyPerBox > 0) {
+        boxAvailableInput.value = (stock / qtyPerBox).toFixed(2);
+      } else {
+        boxAvailableInput.value = "";
+      }
+    }
+
+    stockInput.addEventListener("input", calcularBoxAvailable);
+    qtyPerBoxInput.addEventListener("input", calcularBoxAvailable);
+  });
+</script>
+
+
 
 </body>
 </html>

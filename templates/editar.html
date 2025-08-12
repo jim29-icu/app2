@@ -70,10 +70,8 @@
 
         <div class="col-md-4">
           <label class="form-label">STOCK</label>
-          <input type="number" step="0.01" class="form-control" name="stock" value="{{ producto['STOCK'] }}" readonly>
-          <div class="form-text text-warning">
-    ⚠ Este campo es calculado y no puede ser editado.
-  </div>
+          <input type="number" step="0.01" class="form-control" name="stock" value="{{ producto['STOCK'] }}" required>
+         
           
         </div>
 
@@ -150,5 +148,33 @@
       dateInput.max = today;
     });
   </script>
+
+<!-- calculo de Box_Available -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const stockInput = document.querySelector('input[name="stock"]');
+    const qtyPerBoxInput = document.querySelector('input[name="Qty_Per_Box"]');
+    const boxAvailableInput = document.querySelector('input[name="Box_Available"]');
+
+    function calcularBoxAvailable() {
+        const stock = parseFloat(stockInput.value) || 0;
+        const qtyPerBox = parseFloat(qtyPerBoxInput.value) || 0;
+        if (qtyPerBox > 0) {
+            boxAvailableInput.value = (stock / qtyPerBox).toFixed(1);
+        } else {
+            boxAvailableInput.value = 0;
+        }
+    }
+
+    stockInput.addEventListener("input", calcularBoxAvailable);
+    qtyPerBoxInput.addEventListener("input", calcularBoxAvailable);
+
+    // Calcular al cargar la página con valores existentes
+    calcularBoxAvailable();
+});
+</script>
+
+
+
 </body>
 </html>

@@ -68,7 +68,7 @@ window.addEventListener('load', ajustarFilasPorPagina);
           <th>Date-In</th>
           <th>Qty Vol.</th>
           <th>Unit</th>
-          <th>Income</th>
+         <!--  <th>Income</th>-->
          <!--  <th>Spent</th> -->
           <th class="stock">STOCK</th>
           <th>Qty Per Box</th>
@@ -92,7 +92,7 @@ window.addEventListener('load', ajustarFilasPorPagina);
           <td>{{ producto.Date_In| default('--') }}</td>
           <td>{{ producto.QTY_Vol| default('--') }}</td>
           <td>{{ producto.Unit| default('--') }}</td>
-          <td>{{ producto.Income if producto.Income is defined else '' }}</td>
+         <!--  <td>{{ producto.Income if producto.Income is defined else '' }}</td>-->
            <!-- <td>{{ producto.Spent if producto.Spent is defined else '' }}</td> -->
           <td class="stock {% if producto.STOCK|int <= 0 %}agotado{% endif %}">
             {% if producto.STOCK|int <= 0 %}
