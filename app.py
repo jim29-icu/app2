@@ -151,25 +151,40 @@ def editar(id):
             lower = float(request.form.get('lower', 0))
             stock_actualizado = round(stock_original + add - lower, 2)
 
-            # Aceptar formato m/d/Y (por Flatpickr) o Y-m-d (navegador)
+            # Procesar fecha Date_In
             try:
                 fecha_in = datetime.strptime(request.form['Date_In'], '%m/%d/%Y')
             except ValueError:
                 try:
                     fecha_in = datetime.strptime(request.form['Date_In'], '%Y-%m-%d')
                 except ValueError:
-                    flash("Error: Formato de fecha inválido", "danger")
+                    flash("Error: Formato de fecha inválido en Date_In", "danger")
                     return redirect(url_for('editar', id=id))
 
             if fecha_in.date() > datetime.now().date():
-                flash("Error: La fecha no puede ser futura.", "danger")
+                flash("Error: La fecha de entrada no puede ser futura.", "danger")
                 return redirect(url_for('editar', id=id))
 
             date_in_str = fecha_in.strftime('%Y-%m-%d')
 
-            qty_per_box = float(request.form['Qty_Per_Box'])
+            # Procesar fecha Due_Date
+            due_date = None
+            if request.form.get('Due_Date'):
+                try:
+                    due_date = datetime.strptime(request.form['Due_Date'], '%Y-%m-%d')
+                except ValueError:
+                    try:
+                        due_date = datetime.strptime(request.form['Due_Date'], '%m/%d/%Y')
+                    except ValueError:
+                        flash("Error: Formato de fecha inválido en Due_Date", "danger")
+                        return redirect(url_for('editar', id=id))
 
-            # Calcular Box_Available redondeado a 1 decimal
+            # Calcular Days_Available
+            days_available = None
+            if due_date:
+                days_available = (due_date.date() - fecha_in.date()).days
+
+            qty_per_box = float(request.form['Qty_Per_Box']) if request.form['Qty_Per_Box'] else 0
             box_available = round(stock_actualizado / qty_per_box, 1) if qty_per_box > 0 else 0
 
             qty_vol = producto.get('QTY_Vol', 0)
@@ -181,13 +196,15 @@ def editar(id):
                 "Product_Type": request.form['product_type'],
                 "Located": request.form['located'],
                 "Date_In": date_in_str,
+                "Due_Date": due_date.strftime('%Y-%m-%d') if due_date else "",
+                "Days_Available": days_available,
                 "QTY_Vol": qty_vol,
                 "Unit": request.form['Unit'],
                 "STOCK": stock_actualizado,
                 "Qty_Per_Box": qty_per_box,
                 "Box_Available": box_available,
                 "Maximum _Storage (Days)": float(request.form['Maximum_Storage_Days']),
-                "STATUS": True,  # O mantener el valor anterior si no usas checkbox
+                "STATUS": True,
                 "Note": request.form['Note']
             }
 
@@ -199,15 +216,23 @@ def editar(id):
             flash(f"Error en los datos ingresados: {e}", "danger")
             return redirect(url_for('editar', id=id))
 
-    # Convertir fecha para mostrarla en el input si existe
+    # Preparar formato de fechas para el formulario
     if producto.get('Date_In'):
         try:
             fecha = datetime.strptime(producto['Date_In'], '%Y-%m-%d')
-            producto['Date_In'] = fecha.strftime('%Y-%m-%d')  # Para <input type="date">
+            producto['Date_In'] = fecha.strftime('%Y-%m-%d')
+        except ValueError:
+            pass
+
+    if producto.get('Due_Date'):
+        try:
+            fecha_due = datetime.strptime(producto['Due_Date'], '%Y-%m-%d')
+            producto['Due_Date'] = fecha_due.strftime('%Y-%m-%d')
         except ValueError:
             pass
 
     return render_template('editar.html', producto=producto)
+
 
 
 @app.route('/equipos')

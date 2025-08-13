@@ -279,5 +279,33 @@
 
 
 
+<!-- calculo de days available-->
+
+
+<script>
+  const dateInInput = document.getElementById('Date_In');
+  const dueDateInput = document.getElementById('Due_Date');
+  const daysAvailableInput = document.getElementById('Days_Available');
+
+  function calcularDiasDisponibles() {
+    const dateIn = new Date(dateInInput.value);
+    const dueDate = new Date(dueDateInput.value);
+
+    if (dateIn && dueDate && dueDate >= dateIn) {
+      const diffTime = dueDate - dateIn;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      daysAvailableInput.value = diffDays;
+    } else {
+      daysAvailableInput.value = "";
+    }
+  }
+
+  dateInInput.addEventListener('change', calcularDiasDisponibles);
+  dueDateInput.addEventListener('change', calcularDiasDisponibles);
+</script>
+
+
+
+
 </body>
 </html>
