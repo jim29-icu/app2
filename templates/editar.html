@@ -122,7 +122,9 @@
 
          <div class="col-md-6">
           <label class="form-label">Status</label>
-          <input type="text" name="Status" class="form-control" value="{{ producto['Status'] }}">
+          <input type="text" id="Status" name="Status" class="form-control" value="{{ producto['Status'] }}">
+
+
         </div>
 
          <div class="col-md-6">
@@ -175,37 +177,40 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 
-<!-- calculo de Days_Available -->
+
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
     const dateInInput = document.getElementById('Date_In');
     const dueDateInput = document.getElementById('Due_Date');
     const daysAvailableInput = document.getElementById('Days_Available');
+    const statusInput = document.getElementById('Status');
 
- function calcularDiasDisponibles() {
-  const dateIn = new Date(dateInInput.value);
-  const dueDate = new Date(dueDateInput.value);
+    function actualizarDiasYStatus() {
+        if (dateInInput.value && dueDateInput.value) {
+            const dateIn = new Date(dateInInput.value);
+            const dueDate = new Date(dueDateInput.value);
+            const diffDays = Math.ceil((dueDate - dateIn) / (1000 * 60 * 60 * 24));
 
-  if (dateInInput.value && dueDateInput.value && dueDate >= dateIn) {
-    const diffTime = dueDate - dateIn;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    daysAvailableInput.value = diffDays;
-    document.getElementById('Days_Available_hidden').value = diffDays; // actualiza campo oculto
-  } else {
-    daysAvailableInput.value = "";
-    document.getElementById('Days_Available_hidden').value = "";
-  }
-}
+            daysAvailableInput.value = diffDays;
+            statusInput.value = diffDays > 0 ? "Vigente" : "Expirado";
+        } else {
+            daysAvailableInput.value = "";
+            statusInput.value = "";
+        }
+    }
 
+    // Escuchar cambios
+    dateInInput.addEventListener('input', actualizarDiasYStatus);
+    dueDateInput.addEventListener('input', actualizarDiasYStatus);
 
-    dateInInput.addEventListener('change', calcularDiasDisponibles);
-    dueDateInput.addEventListener('change', calcularDiasDisponibles);
-
-    // Calcular al cargar la página con valores existentes
-    calcularDiasDisponibles();
-  });
+    // Calcular al cargar
+    actualizarDiasYStatus();
+});
 </script>
+
+
+
 
 
 

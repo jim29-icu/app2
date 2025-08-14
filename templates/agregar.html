@@ -186,10 +186,6 @@
         <input type="text" name="Unit" id="Unit" required />
       </div>
 
-     <!--  <div class="col-md-4">
-        <label for="income">Income</label>
-        <input type="number" name="income" id="income" required />
-      </div> -->
 
       <div class="col-md-4">
         <label for="stock">Stock</label>
@@ -224,7 +220,7 @@
 
       <div class="col-md-6">
         <label for="Status">Status</label>
-        <input type="text" name="Status" id="Status" />
+        <input type="text" name="Status" id="Status"  readonly />
       </div>
 
       <div class="col-md-6">
@@ -279,15 +275,17 @@
 
 
 
-<!-- calculo de days available-->
 
 
+
+<!-- calculo de days available y status-->
 <script>
   const dateInInput = document.getElementById('Date_In');
   const dueDateInput = document.getElementById('Due_Date');
   const daysAvailableInput = document.getElementById('Days_Available');
+  const statusInput = document.getElementById('Status');
 
-  function calcularDiasDisponibles() {
+  function calcularDiasYStatus() {
     const dateIn = new Date(dateInInput.value);
     const dueDate = new Date(dueDateInput.value);
 
@@ -295,14 +293,38 @@
       const diffTime = dueDate - dateIn;
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       daysAvailableInput.value = diffDays;
+
+      // Actualizar Status automáticamente
+      statusInput.value = diffDays > 0 ? "Vigente" : "Expirado";
     } else {
       daysAvailableInput.value = "";
+      statusInput.value = "";
     }
   }
 
-  dateInInput.addEventListener('change', calcularDiasDisponibles);
-  dueDateInput.addEventListener('change', calcularDiasDisponibles);
+  dateInInput.addEventListener('change', calcularDiasYStatus);
+  dueDateInput.addEventListener('change', calcularDiasYStatus);
 </script>
+
+
+<!--warining in STATUS-->
+
+<script>
+  // Usamos la variable existente o creamos un scope local
+  (function() {
+    const statusField = document.getElementById('Status');
+    statusField.addEventListener('click', function() {
+      alert('El campo Status se actualiza automáticamente y no se puede editar.');
+    });
+  })();
+</script>
+
+
+
+
+
+
+
 
 
 

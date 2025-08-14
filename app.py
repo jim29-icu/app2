@@ -102,6 +102,13 @@ def agregar():
 
     if request.method == 'POST':
         try:
+            # Obtener y convertir Days_Available de forma segura
+            days_available = int(request.form['Days_Available']) if request.form['Days_Available'] else 0
+
+            # Calcular Status en backend (seguridad)
+            status = "Vigente" if days_available > 0 else "Expirado"
+
+
             nuevo_producto = {
                 "LOT": request.form['LOT'],
                 "ListNumber": request.form['list_number'],
@@ -127,6 +134,8 @@ def agregar():
         except (KeyError, ValueError) as e:
             flash(f"Error en los datos del formulario: {e}", "danger")
             return render_template('agregar.html')
+        
+        
 
     return render_template('agregar.html')
 
@@ -181,13 +190,21 @@ def editar(id):
 
             # Calcular Days_Available
             days_available = None
+            status_text = ""  # Campo para Status
             if due_date:
                 days_available = (due_date.date() - fecha_in.date()).days
+                if days_available > 0:
+                    status_text = "Vigente"
+                else:
+                    status_text = "Expirado"
+
 
             qty_per_box = float(request.form['Qty_Per_Box']) if request.form['Qty_Per_Box'] else 0
             box_available = round(stock_actualizado / qty_per_box, 1) if qty_per_box > 0 else 0
 
             qty_vol = producto.get('QTY_Vol', 0)
+
+            
 
             datos_actualizados = {
                 "LOT": request.form['LOT'],
@@ -204,7 +221,7 @@ def editar(id):
                 "Qty_Per_Box": qty_per_box,
                 "Box_Available": box_available,
                 "Maximum _Storage (Days)": float(request.form['Maximum_Storage_Days']),
-                "STATUS": True,
+                "Status": status_text,
                 "Note": request.form['Note']
             }
 
