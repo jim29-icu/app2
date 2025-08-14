@@ -221,6 +221,9 @@
       <div class="col-md-6">
         <label for="Status">Status</label>
         <input type="text" name="Status" id="Status"  readonly />
+        <div class="form-text text-warning">
+    ⚠ Este campo es calculado y no puede ser editado.
+  </div>
       </div>
 
       <div class="col-md-6">
@@ -307,17 +310,7 @@
 </script>
 
 
-<!--warining in STATUS-->
 
-<script>
-  // Usamos la variable existente o creamos un scope local
-  (function() {
-    const statusField = document.getElementById('Status');
-    statusField.addEventListener('click', function() {
-      alert('El campo Status se actualiza automáticamente y no se puede editar.');
-    });
-  })();
-</script>
 
 
 
