@@ -13,15 +13,92 @@
 <body class="bg-light">
 
 
-<h1 class="titulo-principal">Control de Equipos</h1>
-<div class="container development-message text-center">
-  <div class="icon">🛠️</div>
-  <h1 class="mb-4 text-center">Equipos</h1>
-  <h2>Funcionalidad Equipos en desarrollo</h2>
-  
-   
-  <p>Estamos trabajando en esta sección para ti. ¡Vuelve pronto!</p>
-</div>
+  <h1 class="titulo-principal">ICU Medical - Booking Equiment</h1>
+
+<!-- Buscador-->
+  <div class="acciones-superiores">
+    <input type="text" id="buscador" placeholder="Buscar en la tabla..." value="{{ busqueda }}">
+  </div>
+
+
+
+    <div class="tabla-scroll-container">
+    <table id="tabla-equipos">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Estado</th>
+          <th>ID_equipo</th>
+                          
+      
+        </tr>
+      </thead>
+      <tbody>
+        {% for producto in productos %}
+        <tr>
+          <td>{{ producto.nombre | default('--')}}</td>
+          <td>{{ producto.estado| default('--') }}</td>
+          <td>{{ producto.Id_equipo| default('--') }}</td>
+          <td class="acciones-btn">
+
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    
+  </div>
+
+
+
+  <script>
+  // Búsqueda dinámica
+// Búsqueda dinámica con debounce para no perder el cursor
+
+document.getElementById('buscador').addEventListener('input', function () {
+  const query = this.value.trim();
+
+  // Si el input está vacío, enviar q vacío para traer todo
+  fetch(`/equipos?q=${encodeURIComponent(query)}`)
+    .then(response => response.text())
+    .then(html => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+
+      // Actualiza el tbody con los nuevos datos
+      const nuevoTbody = doc.querySelector('#tabla-equipos tbody');
+      const tbodyActual = document.querySelector('#tabla-equipos tbody');
+      if (nuevoTbody && tbodyActual) {
+        tbodyActual.innerHTML = nuevoTbody.innerHTML;
+      }
+
+      // Actualiza la paginación
+      const nuevaPaginacion = doc.querySelector('.paginacion');
+      const paginacionActual = document.querySelector('.paginacion');
+      if (nuevaPaginacion && paginacionActual) {
+        paginacionActual.innerHTML = nuevaPaginacion.innerHTML;
+      }
+    })
+    .catch(err => console.error('Error en la búsqueda:', err));
+});
+
+
+
+
+  // Exportar a Excel con SheetJS
+  function exportarExcel() {
+    const table = document.getElementById('tabla-inventario');
+    const wb = XLSX.utils.table_to_book(table, {sheet: "Inventario"});
+    XLSX.writeFile(wb, 'inventario_pmc.xlsx');
+  }
+</script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+
+
+
 
 </body>
 </html>

@@ -7,15 +7,24 @@ from datetime import datetime
 app = Flask(__name__)
 app.secret_key = 'clave_secreta'
 
+# ------------------------------
 # Conexión a MongoDB Atlas
+# ------------------------------
+
 client = MongoClient(config.MONGO_URI)
 db = client['MigrationData']
 usuarios = db['usuarios']
 collection = db['Stock']
+equipos_collection = db['Equipos']
+reservas_collection = db["Reservas"]
+
+# ------------------------------
 
 @app.route('/')
 def index():
     return render_template('login.html')
+
+# ------------------------------
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -27,7 +36,7 @@ def login():
         return redirect('/inventario')
     return 'Usuario o contraseña incorrectos'
 
-
+# ------------------------------
 
 @app.route('/inventario')
 def inventario():
@@ -78,12 +87,7 @@ def inventario():
         active_tab='inventario'
     )
 
-
-
-@app.route('/Tarimas')
-def tarimas():
-    return render_template('Tarimas.html', active_tab='Tarimas')
-
+# ------------------------------
 
 
 @app.route('/logout')
@@ -91,7 +95,7 @@ def logout():
     session.pop('usuario', None)
     return redirect('/')
 
-
+# ------------------------------
 
 
 
@@ -140,7 +144,7 @@ def agregar():
     return render_template('agregar.html')
 
 
-
+# ------------------------------
 
 
 
@@ -250,16 +254,7 @@ def editar(id):
 
     return render_template('editar.html', producto=producto)
 
-
-
-@app.route('/equipos')
-def equipos():
-    return render_template('equipos.html', active_tab='equipos')
-
-
-
-        
-
+# ------------------------------
 
 
 @app.route('/eliminar/<id>',methods=['POST'])
@@ -300,5 +295,68 @@ def buscar_productos():
 
     return jsonify(productos)
 
+
+# ------------------------------
+# Mostrar descripcion
+# ------------------------------
+
+@app.route("/get_product_info")
+def get_product_info():
+    list_number = request.args.get("ListNumber")
+    
+    if not list_number:
+        return jsonify({}), 400
+    
+    # Buscar en MongoDB
+    product = collection.find_one({"ListNumber": list_number}, {"_id": 0, "Description": 1, "Product_Type": 1, "Unit": 1, "Qty_Per_Box": 1})
+    
+    if product:
+        return jsonify(product)
+    else:
+        return jsonify({})
+
+
+# ------------------------------
+# Mostrar equipos
+# ------------------------------
+@app.route("/equipos")
+def listar_equipos():
+    equipos = list(equipos_collection.find())
+    return render_template("equipos.html", equipos=equipos)
+
+# ------------------------------
+# Mostrar vista Tarimas
+# ------------------------------
+
+@app.route('/Tarimas')
+def tarimas():
+    return render_template('Tarimas.html', active_tab='Tarimas')
+
+
+
+# ------------------------------
+# Mostrar vista Calendario
+# ------------------------------
+@app.route("/calendario")
+def calendario():
+    return render_template("calendario.html")
+
+
+@app.route("/api/reservas")
+def api_reservas():
+    reservas = list(reservas_collection.find())
+    eventos = []
+    for r in reservas:
+        eventos.append({
+            "title": "Reservado",
+            "start": r["fecha_inicio"].isoformat(),
+            "end": r["fecha_fin"].isoformat()
+        })
+    return jsonify(eventos)
+
+
+
+
+# ------------------------------
 if __name__ == "__main__":
     app.run(debug=True)
