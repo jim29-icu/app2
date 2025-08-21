@@ -110,7 +110,7 @@ def agregar():
             days_available = int(request.form['Days_Available']) if request.form['Days_Available'] else 0
 
             # Calcular Status en backend (seguridad)
-            status = "Vigente" if days_available > 0 else "Expirado"
+            status = "Expirado" if days_available < 0 else "Vigente"
 
 
             nuevo_producto = {
@@ -206,7 +206,7 @@ def editar(id):
             qty_per_box = float(request.form['Qty_Per_Box']) if request.form['Qty_Per_Box'] else 0
             box_available = round(stock_actualizado / qty_per_box, 1) if qty_per_box > 0 else 0
 
-            qty_vol = producto.get('QTY_Vol', 0)
+            qty_vol = float(request.form.get('QTY_Vol', 0))
 
             
 
