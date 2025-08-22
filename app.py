@@ -77,6 +77,9 @@ def inventario():
             except Exception:
                 pass
 
+            success = request.args.get('success') == '1' # <- paso parametro para agregar
+            edited = request.args.get('edited') == '1' # <- paso parametro para editar
+
     return render_template(
         'inventario.html',
         productos=productos,
@@ -84,7 +87,10 @@ def inventario():
         page=page,
         total_paginas=total_paginas,
         por_pagina=por_pagina,
-        active_tab='inventario'
+        
+        success=success,  # <- agregar
+        edited=edited      # para edición
+        
     )
 
 # ------------------------------
@@ -133,7 +139,7 @@ def agregar():
                 "STATUS": True
             }
             collection.insert_one(nuevo_producto)
-            return redirect('/inventario')
+            return redirect(url_for('inventario', success=1))
 
         except (KeyError, ValueError) as e:
             flash(f"Error en los datos del formulario: {e}", "danger")
@@ -231,7 +237,7 @@ def editar(id):
 
             collection.update_one({'_id': ObjectId(id)}, {'$set': datos_actualizados})
             flash("Producto actualizado correctamente.", "success")
-            return redirect('/inventario')
+            return redirect(url_for('inventario', edited=1))
 
         except (ValueError, KeyError) as e:
             flash(f"Error en los datos ingresados: {e}", "danger")

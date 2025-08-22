@@ -226,6 +226,56 @@ document.getElementById('buscador').addEventListener('input', function () {
 
 
 
+<!-- SweetAlert2  agregra 
+{% if success is defined and success %}
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!',
+        text: 'Producto agregado exitosamente',
+        confirmButtonText: 'Cerrar'
+    });
+</script>
+{% endif %}
+-->
+
+<!-- SweetAlert2 agrega / edita-->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{% if success %}
+<script>
+  function removeQueryParam(param) {
+    const url = new URL(window.location);
+    url.searchParams.delete(param);
+    window.history.replaceState({}, document.title, url);
+  }
+
+  Swal.fire({
+    icon: 'success',
+    title: '¡Éxito!',
+    text: 'Producto agregado correctamente',
+    confirmButtonText: 'Cerrar'
+  }).then(() => removeQueryParam('success'));
+</script>
+{% elif edited %}
+<script>
+  function removeQueryParam(param) {
+    const url = new URL(window.location);
+    url.searchParams.delete(param);
+    window.history.replaceState({}, document.title, url);
+  }
+
+  Swal.fire({
+    icon: 'success',
+    title: '¡Éxito!',
+    text: 'Producto editado correctamente',
+    confirmButtonText: 'Cerrar'
+  }).then(() => removeQueryParam('edited'));
+</script>
+{% endif %}
+
+
+
 
 
 </body>
