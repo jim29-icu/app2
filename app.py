@@ -3,6 +3,11 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 import config
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
 
 app = Flask(__name__)
 app.secret_key = 'clave_secreta'
@@ -13,7 +18,7 @@ app.secret_key = 'clave_secreta'
 
 client = MongoClient(config.MONGO_URI)
 db = client['MigrationData']
-usuarios = db['usuarios']
+usuarios  = db['usuarios']
 collection = db['Stock']
 equipos_collection = db['Equipos']
 reservas_collection = db["Reservas"]
@@ -26,15 +31,161 @@ def index():
 
 # ------------------------------
 
-@app.route('/login', methods=['POST'])
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    user = request.form['usuario']
-    pwd = request.form['password']
-    user_found = usuarios.find_one({'usuario': user, 'password': pwd})
-    if user_found:
-        session['usuario'] = user
-        return redirect('/inventario')
-    return 'Usuario o contraseña incorrectos'
+    if request.method == "POST":
+        usuario = request.form["usuario"]
+        password = request.form["password"]
+
+        user = usuarios.find_one({"username": usuario})
+        if user and check_password_hash(user["password"], password):
+            session["usuario"] = usuario
+            return redirect(url_for("inventario"))  # 👈 redirige a tu vista principal
+        else:
+            flash("Usuario o contraseña incorrectos", "danger")
+            return redirect(url_for("login"))
+
+    return render_template("login.html")
+
+# -------Registrar Usuario-----------------------
+@app.route('/registrar', methods=['GET', 'POST'])
+def registrar():
+    if request.method == 'POST':
+        # Obtener datos del formulario
+        username = request.form.get('username', '').strip()
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '').strip()
+        password2 = request.form.get('password2', '').strip()
+
+        # --- Depuración (consola) ---
+        print("📩 Datos recibidos:", username, email)
+
+        # Validaciones básicas
+        if not username or not email or not password or not password2:
+            flash("Todos los campos son obligatorios", "danger")
+            return redirect(url_for('registrar'))
+
+        if not email.endswith("@icumed.com"):
+            flash("El correo debe ser de Icumed (@icumed.com)", "danger")
+            return redirect(url_for('registrar'))
+
+        if password != password2:
+            flash("Las contraseñas no coinciden", "danger")
+            return redirect(url_for('registrar'))
+
+        # Verificar si usuario o correo ya existen
+        if usuarios.find_one({"username": username}):
+            flash("El usuario ya existe", "danger")
+            return redirect(url_for('registrar'))
+
+        if usuarios.find_one({"email": email}):
+            flash("Este correo ya está registrado", "danger")
+            return redirect(url_for('registrar'))
+
+        # Guardar usuario con contraseña encriptada y rol por defecto
+        hashed_password = generate_password_hash(password)
+        try:
+            result = usuarios.insert_one({
+                "username": username,
+                "email": email,
+                "password": hashed_password,
+                "rol": "usuario"  # por defecto
+            })
+            print("✅ Usuario insertado con ID:", result.inserted_id)
+        except Exception as e:
+            print("❌ Error al insertar:", e)
+            flash("Error al registrar usuario", "danger")
+            return redirect(url_for('registrar'))
+
+        flash("Usuario registrado correctamente", "success")
+        return redirect(url_for('login'))
+
+    # GET → mostrar formulario
+    return render_template('registrar.html')
+
+
+
+# ---------Recueperar contrasena correo---------------------
+@app.route('/recuperar', methods=['GET', 'POST'])
+def recuperar():
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip().lower()
+
+        # Verificar si existe en la BD
+        user = usuarios.find_one({"email": email})
+        if not user:
+            flash("Este correo no está registrado", "danger")
+            return redirect(url_for('recuperar'))
+
+        # Crear token temporal (simple por ahora: el username)
+        reset_link = f"http://127.0.0.1:5000/reset_password/{user['_id']}"
+
+        # Enviar correo con enlace
+        enviar_correo(
+            destinatario=email,
+            asunto="Recuperación de contraseña",
+            mensaje=f"Hola {user['username']},\n\nPara restablecer tu contraseña haz clic en el siguiente enlace:\n{reset_link}\n\nSi no solicitaste este cambio, ignora este correo."
+        )
+
+        flash("Se envió un enlace de recuperación a tu correo", "success")
+        return redirect(url_for('login'))
+
+    return render_template('recuperar.html')
+
+
+def enviar_correo(destinatario, asunto, mensaje):
+    remitente = "tu_correo@outlook.com"
+    password = "TU_CONTRASEÑA_DE_OUTLOOK"  # ⚠️ Recomiendo usar variables de entorno
+
+    msg = MIMEMultipart()
+    msg['From'] = remitente
+    msg['To'] = destinatario
+    msg['Subject'] = asunto
+
+    msg.attach(MIMEText(mensaje, 'plain'))
+
+    try:
+        server = smtplib.SMTP("smtp.office365.com", 587)
+        server.starttls()
+        server.login(remitente, password)
+        server.send_message(msg)
+        server.quit()
+        print("Correo enviado correctamente")
+    except Exception as e:
+        print("Error enviando correo:", e)
+
+
+# ----Rreset_password/--------------------------
+from bson import ObjectId
+
+@app.route('/reset_password/<user_id>', methods=['GET', 'POST'])
+def reset_password(user_id):
+    user = usuarios.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        flash("Enlace inválido o expirado", "danger")
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        new_password = request.form.get('password', '').strip()
+        confirm_password = request.form.get('password2', '').strip()
+
+        if new_password != confirm_password:
+            flash("Las contraseñas no coinciden", "danger")
+            return redirect(url_for('reset_password', user_id=user_id))
+
+        hashed_password = generate_password_hash(new_password)
+        usuarios.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": {"password": hashed_password}}
+        )
+
+        flash("Contraseña restablecida correctamente", "success")
+        return redirect(url_for('login'))
+
+    return render_template('reset_password.html', user=user)
+
+
+
 
 # ------------------------------
 
