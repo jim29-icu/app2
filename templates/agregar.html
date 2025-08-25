@@ -351,11 +351,13 @@ document.getElementById("list_number").addEventListener("blur", function() {
                 document.getElementById("product_type").value = data.Product_Type || "";
                 document.getElementById("Unit").value = data.Unit || "";
                 document.getElementById("Qty_Per_Box").value = data.Qty_Per_Box || "";
+                document.getElementById("QTY_Vol").value = data.QTY_Vol ?? "";
                 
                 // Opcional: recalcular Box Available si ya tienes el cálculo
                 const stockInput = document.getElementById("stock");
                 const qtyPerBoxInput = document.getElementById("Qty_Per_Box");
                 const boxAvailableInput = document.getElementById("Box_Available");
+                
                 const stock = parseFloat(stockInput.value) || 0;
                 const qtyPerBox = parseFloat(qtyPerBoxInput.value) || 0;
                 if (qtyPerBox > 0) {

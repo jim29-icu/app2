@@ -3,20 +3,44 @@
 <head>
   <meta charset="UTF-8" />
   <title>Tarimas</title>
-  
   <link rel="stylesheet" href="{{ url_for('static', filename='CSS/estilos.css') }}">
-  
+  <style>
+    /* Centrar todo vertical y horizontalmente */
+    .development-message {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh; /* altura completa de la ventana */
+      text-align: center;
+    }
+    .development-message .icon {
+      font-size: 5rem;
+      margin-bottom: 1rem;
+    }
+    .development-message h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .development-message h2 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+      font-weight: normal;
+    }
+    .development-message p {
+      font-size: 1.2rem;
+      color: #555;
+    }
+  </style>
 </head>
 
-{% include "header.html" %}
+{% include "base.html" %}
 
 <body class="bg-light">
 
-
-
-  <div class="container development-message text-center">
+  <div class="container development-message">
     <div class="icon">🛠️</div>
-    <h1 class="mb-4 text-center">Tarimas</h1>
+    <h1>Tarimas</h1>
     <h2>Funcionalidad TARIMAS en desarrollo</h2>
     <p>Estamos trabajando en esta sección para ti. ¡Vuelve pronto!</p>
   </div>
