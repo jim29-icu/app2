@@ -131,7 +131,7 @@ def agregar():
                 "STOCK": float(request.form['stock']) if request.form['stock'] else 0,
                 "Qty_Per_Box": float(request.form['Qty_Per_Box']) if request.form['Qty_Per_Box'] else 0,
                 "Box_Available": float(request.form['Box_Available']) if request.form['Box_Available'] else 0,
-                "Maximum_Storage_Days": float(request.form['Maximum_Storage_Days']) if request.form['Maximum_Storage_Days'] else 0,
+               # "Maximum_Storage_Days": float(request.form['Maximum_Storage_Days']) if request.form['Maximum_Storage_Days'] else 0,
                 "Due_Date": request.form['Due_Date'] if request.form['Due_Date'] else None,
                 "Days_Available": int(request.form['Days_Available']) if request.form['Days_Available'] else 0,
                 "Status": request.form['Status'],
@@ -214,6 +214,15 @@ def editar(id):
 
             qty_vol = float(request.form.get('QTY_Vol', 0))
 
+            # Fecha de entrada
+            fecha_in = datetime.strptime(request.form['Date_In'], '%Y-%m-%d')
+
+            # Días que lleva el producto en inventario
+            dias_en_inventario = (datetime.now().date() - fecha_in.date()).days
+
+
+            
+
             
 
             datos_actualizados = {
@@ -230,7 +239,7 @@ def editar(id):
                 "STOCK": stock_actualizado,
                 "Qty_Per_Box": qty_per_box,
                 "Box_Available": box_available,
-                "Maximum _Storage (Days)": float(request.form['Maximum_Storage_Days']),
+                "Maximum_Storage_Days": dias_en_inventario,
                 "Status": status_text,
                 "Note": request.form['Note']
             }

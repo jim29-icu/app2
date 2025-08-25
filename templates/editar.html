@@ -220,7 +220,25 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 
+<!-- Calcular Maximum_Storage_Days -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const dateInInput = document.getElementById('Date_In');
+    const maxStorageInput = document.querySelector('input[name="Maximum_Storage_Days"]');
 
+    function actualizarDias() {
+        if (dateInInput.value) {
+            const fechaIn = new Date(dateInInput.value);
+            const hoy = new Date();
+            const diffDays = Math.floor((hoy - fechaIn) / (1000 * 60 * 60 * 24));
+            maxStorageInput.value = diffDays;
+        }
+    }
+
+    dateInInput.addEventListener('input', actualizarDias);
+    actualizarDias(); // calcular al cargar la página
+});
+</script>
 
 
 
