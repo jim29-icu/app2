@@ -35,6 +35,25 @@
 
      <div class="col-md-6 login-form">
     <h3 class="mb-4 text-center">Iniciar sesión</h3>
+
+
+
+<!-- Renderizar mensajes de backend -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="alert-container">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+
+
+    
     <form action="/login" method="POST">
       <div class="mb-3">
         <label for="usuario" class="form-label">Usuario</label>
@@ -61,5 +80,10 @@
 
     </div>
   </div>
+
+
+
+
+
 </body>
 </html>

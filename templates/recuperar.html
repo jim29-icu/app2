@@ -20,15 +20,9 @@
       width: 100%;
       max-width: 400px;
     }
-    h2 {
-      color: #333;
-      margin-bottom: 10px;
-    }
-    p {
-      color: #666;
-      margin-bottom: 20px;
-    }
-    input[type="text"] {
+    h2 { color: #333; margin-bottom: 10px; }
+    p { color: #666; margin-bottom: 20px; }
+    input[type="email"] {
       width: 100%;
       padding: 10px;
       margin-bottom: 15px;
@@ -44,9 +38,7 @@
       border-radius: 4px;
       cursor: pointer;
     }
-    button:hover {
-      background-color: #0056b3;
-    }
+    button:hover { background-color: #0056b3; }
     .login-link {
       display: block;
       margin-top: 15px;
@@ -54,22 +46,18 @@
       color: #007bff;
       text-decoration: none;
     }
-    .login-link:hover {
-      text-decoration: underline;
-    }
+    .login-link:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Restablecer contraseña</h2>
     <p>Ingrese su correo con que se ha registrado y te enviaremos instrucciones para restablecer tu contraseña</p>
-    <form>
-      <input type="text" placeholder="Correo electrónico" required>
+    <form action="{{ url_for('recuperar') }}" method="POST">
+      <input type="email" name="email" placeholder="Correo electrónico" required>
       <button type="submit">Enviar</button>
     </form>
-    <a href="#" class="login-link"><a href="{{ url_for('login') }}">Iniciar sesión con tus credenciales</a>
-    
-    
+    <a href="{{ url_for('login') }}" class="login-link">Iniciar sesión con tus credenciales</a>
   </div>
 </body>
 </html>
