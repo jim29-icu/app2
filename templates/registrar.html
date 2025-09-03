@@ -30,5 +30,20 @@
         <p class="mt-3 text-center">¿Ya tienes cuenta? <a href="{{ url_for('login') }}">Inicia sesión</a></p>
     </form>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <script>
+      Swal.fire({
+        icon: '{{ messages[0][0] == "danger" and "error" or "success" }}',
+        title: '{{ messages[0][1] }}',
+        confirmButtonText: 'Cerrar'
+      });
+    </script>
+  {% endif %}
+{% endwith %}
+
 </body>
 </html>

@@ -132,7 +132,7 @@ def recuperar():
 
     return render_template('recuperar.html')
 
-
+# Enviar correo con enlace
 def enviar_correo(destinatario, asunto, mensaje):
     remitente = "tu_correo@outlook.com"
     password = "TU_CONTRASEÑA_DE_OUTLOOK"  # ⚠️ Recomiendo usar variables de entorno
@@ -420,8 +420,46 @@ def editar(id):
 
     return render_template('editar.html', producto=producto)
 
-# ------------------------------
+# ----------busqueda y exportar--------------------
 
+
+
+@app.route('/api/exportar_stock')
+def exportar_stock():
+    if 'usuario' not in session:
+        return jsonify([])
+
+    q = request.args.get('q', '').strip()
+    filtro = {}
+    if q:
+        filtro = {
+            "$or": [
+                {"LOT": {"$regex": q, "$options": "i"}},
+                {"Description": {"$regex": q, "$options": "i"}},
+                {"ListNumber": {"$regex": q, "$options": "i"}},
+                {"Product_Type": {"$regex": q, "$options": "i"}}
+            ]
+        }
+
+    productos = list(collection.find(filtro, {"_id": 0}))  # quitamos _id
+
+    # Formateo de fecha igual que en /buscar_productos
+    for prod in productos:
+        if 'Date_In' in prod:
+            try:
+                fecha = datetime.strptime(prod['Date_In'], '%Y-%m-%d')
+                prod['Date_In'] = fecha.strftime('%m/%d/%Y')
+            except Exception:
+                pass
+
+    return jsonify(productos)
+
+
+
+
+
+
+# ------------------------------
 
 @app.route('/eliminar/<id>',methods=['POST'])
 def eliminar(id):
@@ -430,6 +468,9 @@ def eliminar(id):
 
     collection.delete_one({'_id': ObjectId(id)})
     return redirect('/inventario')
+
+
+# ------------------------------
 
 @app.route('/buscar_productos')
 def buscar_productos():
