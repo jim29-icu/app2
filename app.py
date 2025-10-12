@@ -280,7 +280,6 @@ def logout():
 
 # ---------Agregar---------------------
 
-
 @app.route('/agregar', methods=['GET', 'POST'])
 def agregar():
     if 'usuario' not in session:
@@ -433,8 +432,20 @@ def editar(id):
 
             collection.update_one({'_id': ObjectId(id)}, {'$set': datos_actualizados})
             #Auditoria
-            detalle = f"Producto editado: {datos_actualizados['Description']}, LOT: {datos_actualizados['LOT']}, Nuevos datos: {datos_actualizados}"
-            registrar_evento(db, session['usuario'], "Editar producto", detalle)
+            lote = producto.get("LOT", "Sin lote")
+            cambios = {}
+            for campo, nuevo_valor in datos_actualizados.items():
+                    valor_anterior = producto.get(campo)
+                    if valor_anterior != nuevo_valor:
+                                cambios[campo] = {
+                                                "antes": valor_anterior,
+                                                            "después": nuevo_valor
+                                                            }
+            detalle = f"Edición de producto (LOT: {lote}):\n"
+            for campo, valores in cambios.items():
+                    detalle += f"- {campo}: '{valores['antes']}' → '{valores['después']}'\n"
+                    registrar_evento(db, session['usuario'], "Editar producto", detalle)
+
 
             flash("Producto actualizado correctamente.", "success")
             return redirect(url_for('inventario', edited=1))
