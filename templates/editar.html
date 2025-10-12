@@ -61,7 +61,7 @@
 
         <div class="col-md-6">
           <label class="form-label">Date-In</label>
-          <input type="date" class="form-control" name="Date_In" id="Date_In" value="{{ producto['Date_In'] | default('') }}" max="">
+          <input type="date" class="form-control" name="Date_In" id="Date_In" value="{{ producto['Date_In'] | default('') }}" max="" required>
         </div>
 
         <div class="col-md-6">
@@ -118,7 +118,7 @@
 
            <div class="col-md-6">
           <label class="form-label">Due Date</label>
-          <input type="date" name="Due_Date" id="Due_Date" class="form-control" value="{{ producto['Due_Date'] }}">
+          <input type="date" name="Due_Date" id="Due_Date" class="form-control" value="{{ producto['Due_Date'] }}" required>
         </div>
 
          <div class="col-md-6">
