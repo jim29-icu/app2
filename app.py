@@ -269,6 +269,31 @@ def agregar():
             # Calcular Status en backend (seguridad)
             status = "Expirado" if days_available < 0 else "Vigente"
 
+            # Procesar Date_In en formato MM/DD/YYYY
+            try:
+                fecha_in = datetime.strptime(request.form['Date_In'], '%Y-%m-%d')  # navegador envía en este formato
+            except ValueError:
+                try:
+                    fecha_in = datetime.strptime(request.form['Date_In'], '%m/%d/%Y')
+                except ValueError:
+                    flash("Error: Formato de fecha inválido en Date_In", "danger")
+                    return render_template('agregar.html')
+
+            date_in_str = fecha_in.strftime('%m/%d/%Y')  # guardar como MM/DD/YYYY
+
+            # Procesar Due_Date si existe
+            due_date_str = None
+            if request.form.get('Due_Date'):
+                try:
+                    fecha_due = datetime.strptime(request.form['Due_Date'], '%Y-%m-%d')
+                    due_date_str = fecha_due.strftime('%m/%d/%Y')
+                except ValueError:
+                    try:
+                        fecha_due = datetime.strptime(request.form['Due_Date'], '%m/%d/%Y')
+                        due_date_str = fecha_due.strftime('%m/%d/%Y')
+                    except ValueError:
+                        flash("Error: Formato de fecha inválido en Due_Date", "danger")
+                        return render_template('agregar.html')
 
             nuevo_producto = {
                 "LOT": request.form['LOT'],
@@ -276,35 +301,30 @@ def agregar():
                 "Description": request.form['description'],
                 "Product_Type": request.form['product_type'],
                 "Located": request.form['located'],
-                "Date_In": request.form['Date_In'],
+                "Date_In": date_in_str,
                 "QTY_Vol": float(request.form['QTY_Vol']) if request.form['QTY_Vol'] else 0,
                 "Unit": request.form['Unit'],
                 "STOCK": float(request.form['stock']) if request.form['stock'] else 0,
                 "Qty_Per_Box": float(request.form['Qty_Per_Box']) if request.form['Qty_Per_Box'] else 0,
                 "Box_Available": float(request.form['Box_Available']) if request.form['Box_Available'] else 0,
-               # "Maximum_Storage_Days": float(request.form['Maximum_Storage_Days']) if request.form['Maximum_Storage_Days'] else 0,
-                "Due_Date": request.form['Due_Date'] if request.form['Due_Date'] else None,
-                "Days_Available": int(request.form['Days_Available']) if request.form['Days_Available'] else 0,
-                "Status": request.form['Status'],
+                "Due_Date": due_date_str,
+                "Days_Available": days_available,
+                "Status": status,
                 "Note": request.form['Note'],
                 "STATUS": True
             }
+
             collection.insert_one(nuevo_producto)
             return redirect(url_for('inventario', success=1))
 
         except (KeyError, ValueError) as e:
             flash(f"Error en los datos del formulario: {e}", "danger")
             return render_template('agregar.html')
-        
-        
 
     return render_template('agregar.html')
 
 
-# ------------------------------
-
-
-
+# ---------Editar producto---------------------
 @app.route('/editar/<id>', methods=['GET', 'POST'])
 def editar(id):
     if 'usuario' not in session:
@@ -323,10 +343,10 @@ def editar(id):
 
             # Procesar fecha Date_In
             try:
-                fecha_in = datetime.strptime(request.form['Date_In'], '%m/%d/%Y')
+                fecha_in = datetime.strptime(request.form['Date_In'], '%Y-%m-%d')
             except ValueError:
                 try:
-                    fecha_in = datetime.strptime(request.form['Date_In'], '%Y-%m-%d')
+                    fecha_in = datetime.strptime(request.form['Date_In'], '%m/%d/%Y')
                 except ValueError:
                     flash("Error: Formato de fecha inválido en Date_In", "danger")
                     return redirect(url_for('editar', id=id))
@@ -335,7 +355,7 @@ def editar(id):
                 flash("Error: La fecha de entrada no puede ser futura.", "danger")
                 return redirect(url_for('editar', id=id))
 
-            date_in_str = fecha_in.strftime('%Y-%m-%d')
+            date_in_str = fecha_in.strftime('%m/%d/%Y')  # Guardar como MM/DD/YYYY
 
             # Procesar fecha Due_Date
             due_date = None
@@ -349,32 +369,17 @@ def editar(id):
                         flash("Error: Formato de fecha inválido en Due_Date", "danger")
                         return redirect(url_for('editar', id=id))
 
-            # Calcular Days_Available
+            # Calcular Days_Available y Status
             days_available = None
-            status_text = ""  # Campo para Status
+            status_text = ""
             if due_date:
                 days_available = (due_date.date() - fecha_in.date()).days
-                if days_available > 0:
-                    status_text = "Vigente"
-                else:
-                    status_text = "Expirado"
-
+                status_text = "Vigente" if days_available > 0 else "Expirado"
 
             qty_per_box = float(request.form['Qty_Per_Box']) if request.form['Qty_Per_Box'] else 0
             box_available = round(stock_actualizado / qty_per_box, 1) if qty_per_box > 0 else 0
-
             qty_vol = float(request.form.get('QTY_Vol', 0))
-
-            # Fecha de entrada
-            fecha_in = datetime.strptime(request.form['Date_In'], '%Y-%m-%d')
-
-            # Días que lleva el producto en inventario
             dias_en_inventario = (datetime.now().date() - fecha_in.date()).days
-
-
-            
-
-            
 
             datos_actualizados = {
                 "LOT": request.form['LOT'],
@@ -383,7 +388,7 @@ def editar(id):
                 "Product_Type": request.form['product_type'],
                 "Located": request.form['located'],
                 "Date_In": date_in_str,
-                "Due_Date": due_date.strftime('%Y-%m-%d') if due_date else "",
+                "Due_Date": due_date.strftime('%m/%d/%Y') if due_date else None,
                 "Days_Available": days_available,
                 "QTY_Vol": qty_vol,
                 "Unit": request.form['Unit'],
@@ -404,21 +409,23 @@ def editar(id):
             return redirect(url_for('editar', id=id))
 
     # Preparar formato de fechas para el formulario
-    if producto.get('Date_In'):
+    if 'Date_In' in producto and producto['Date_In']:
         try:
-            fecha = datetime.strptime(producto['Date_In'], '%Y-%m-%d')
+            fecha = datetime.strptime(producto['Date_In'], '%m/%d/%Y')
             producto['Date_In'] = fecha.strftime('%Y-%m-%d')
         except ValueError:
-            pass
+            producto['Date_In'] = ''
 
-    if producto.get('Due_Date'):
+    if 'Due_Date' in producto and producto['Due_Date']:
         try:
-            fecha_due = datetime.strptime(producto['Due_Date'], '%Y-%m-%d')
+            fecha_due = datetime.strptime(producto['Due_Date'], '%m/%d/%Y')
             producto['Due_Date'] = fecha_due.strftime('%Y-%m-%d')
         except ValueError:
-            pass
+            producto['Due_Date'] = ''
 
     return render_template('editar.html', producto=producto)
+
+
 
 # ----------busqueda y exportar--------------------
 
@@ -560,6 +567,47 @@ def api_reservas():
             "end": r["fecha_fin"].isoformat()
         })
     return jsonify(eventos)
+
+
+# ---------normalizar-fechas---------------------
+
+@app.route('/normalizar-fechas')
+def normalizar_fechas():
+    if 'usuario' not in session:
+        return redirect('/')
+
+    corregidos = 0
+    for producto in collection.find():
+        date_in = producto.get("Date_In")
+        due_date = producto.get("Due_Date")
+
+        # Normalizar Date_In
+        if date_in and isinstance(date_in, str):
+            try:
+                fecha = datetime.strptime(date_in, '%Y-%m-%d')
+                date_in_mmddyyyy = fecha.strftime('%m/%d/%Y')
+                collection.update_one(
+                    {'_id': producto['_id']},
+                    {'$set': {'Date_In': date_in_mmddyyyy}}
+                )
+                corregidos += 1
+            except ValueError:
+                pass  # ya está en formato correcto o inválido
+
+        # Normalizar Due_Date
+        if due_date and isinstance(due_date, str):
+            try:
+                fecha_due = datetime.strptime(due_date, '%Y-%m-%d')
+                due_date_mmddyyyy = fecha_due.strftime('%m/%d/%Y')
+                collection.update_one(
+                    {'_id': producto['_id']},
+                    {'$set': {'Due_Date': due_date_mmddyyyy}}
+                )
+                corregidos += 1
+            except ValueError:
+                pass
+
+    return f"✅ Fechas normalizadas en {corregidos} productos."
 
 
 
