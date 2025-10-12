@@ -23,6 +23,30 @@ collection = db['Stock']
 equipos_collection = db['Equipos']
 reservas_collection = db["Reservas"]
 
+
+
+# ------fucion Audotoria------------------------
+
+def registrar_evento(db, usuario, accion, detalle=""):
+    evento = {
+        "usuario": usuario,
+        "accion": accion,
+        "detalle": detalle,
+        "fecha": datetime.now()
+    }
+    db.auditoria.insert_one(evento)
+
+
+# ------------Revisar auditoria------------------
+@app.route('/auditoria')
+def ver_auditoria():
+    if 'usuario' not in session:
+        return redirect('/')
+
+    eventos = db.auditoria.find().sort("fecha", -1)  # orden descendente
+    return render_template('auditoria.html', eventos=eventos)
+
+
 # ------------------------------
 
 @app.route('/')
@@ -247,10 +271,12 @@ def inventario():
 # ------------------------------
 
 
+
 @app.route('/logout')
 def logout():
-    session.pop('usuario', None)
-    return redirect('/')
+    session.clear()  # Limpia toda la sesión
+    return redirect(url_for('login'))
+
 
 # ------------------------------
 
@@ -315,6 +341,12 @@ def agregar():
             }
 
             collection.insert_one(nuevo_producto)
+            # Auditoría
+            detalle = f"Producto agregado: {nuevo_producto['Description']}, LOT: {nuevo_producto['LOT']}"
+            registrar_evento(db, session['usuario'], "Agregar producto", detalle)
+
+            
+
             return redirect(url_for('inventario', success=1))
 
         except (KeyError, ValueError) as e:
@@ -401,6 +433,10 @@ def editar(id):
             }
 
             collection.update_one({'_id': ObjectId(id)}, {'$set': datos_actualizados})
+            #Auditoria
+            detalle = f"Producto editado: {datos_actualizados['Description']}, LOT: {datos_actualizados['LOT']}, Nuevos datos: {datos_actualizados}"
+            registrar_evento(db, session['usuario'], "Editar producto", detalle)
+
             flash("Producto actualizado correctamente.", "success")
             return redirect(url_for('inventario', edited=1))
 
@@ -468,13 +504,31 @@ def exportar_stock():
 
 # ------------------------------
 
-@app.route('/eliminar/<id>',methods=['POST'])
+@app.route('/eliminar/<id>', methods=['POST'])
 def eliminar(id):
     if 'usuario' not in session:
         return redirect('/')
 
+    # Recuperar el producto antes de eliminarlo
+    producto = collection.find_one({'_id': ObjectId(id)})
+    if not producto:
+        flash("Producto no encontrado.", "danger")
+        return redirect('/inventario')
+
+    # Extraer datos clave para trazabilidad
+    lote = producto.get("LOT", "Sin lote")
+    descripcion = producto.get("Description", "Sin descripción")
+    detalle = f"Producto eliminado: {descripcion}, LOT: {lote}"
+
+    # Registrar auditoría
+    registrar_evento(db, session['usuario'], "Eliminar producto", detalle)
+
+    # Eliminar el producto
     collection.delete_one({'_id': ObjectId(id)})
+
+    flash("Producto eliminado correctamente.", "success")
     return redirect('/inventario')
+
 
 
 # ------------------------------
