@@ -278,8 +278,7 @@ def logout():
     return redirect(url_for('login'))
 
 
-# ------------------------------
-
+# ---------Agregar---------------------
 
 
 @app.route('/agregar', methods=['GET', 'POST'])
