@@ -43,8 +43,15 @@ def ver_auditoria():
     if 'usuario' not in session:
         return redirect('/')
 
-    eventos = db.auditoria.find().sort("fecha", -1)  # orden descendente
+    filtro_lote = request.args.get('lote', '').strip()
+
+    query = {}
+    if filtro_lote:
+        query['detalle'] = {'$regex': filtro_lote, '$options': 'i'}  # búsqueda parcial, insensible a mayúsculas
+
+    eventos = db.auditoria.find(query).sort("fecha", -1)
     return render_template('auditoria.html', eventos=eventos)
+
 
 
 # ------------------------------
