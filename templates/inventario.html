@@ -53,6 +53,9 @@ window.addEventListener('load', ajustarFilasPorPagina);
     <div class="botones-acciones">
       <button class="boton-agregar" onclick="window.location.href='/agregar'">Agregar Producto</button>
       <button class="boton-exportar" onclick="exportarExcel()">Exportar a Excel</button>
+      <button style="background-color: red; color: white;" onclick="eliminarSeleccionados()">Eliminar Seleccionados</button>
+
+
     </div>
   </div>
 
@@ -82,6 +85,12 @@ window.addEventListener('load', ajustarFilasPorPagina);
           <th>Acciones</th>
         </tr>
       </thead>
+
+<!--  Multi  Selection-->
+  
+
+
+
       <tbody>
         {% for producto in productos %}
         <tr>
@@ -110,10 +119,11 @@ window.addEventListener('load', ajustarFilasPorPagina);
           <td>{{ producto.Status| default('--') }}</td>
           <td>{{ producto.Note | default('--')}}</td>
           <td class="acciones-btn">
+  <input type="checkbox" class="check-producto" value="{{ producto._id }}" style="margin-right: 8px;">
   <a href="{{ url_for('editar', id=producto._id) }}" class="btn-editar">Editar</a>
   <button class="btn-eliminar" onclick="confirmarEliminacion('{{ producto._id }}')">Eliminar</button>
-
 </td>
+
 
         </tr>
         {% endfor %}
@@ -308,7 +318,58 @@ async function exportarExcel() {
 </script>
 {% endif %}
 
+<!-- Sweey alert to multi deleteed-->
+{% if request.args.get('eliminados') %}
+<script>
+  function removeQueryParam(param) {
+    const url = new URL(window.location);
+    url.searchParams.delete(param);
+    window.history.replaceState({}, document.title, url);
+  }
 
+  Swal.fire({
+    icon: 'success',
+    title: '¡Productos eliminados!',
+    text: '{{ request.args.get("eliminados") }} producto(s) fueron eliminados correctamente.',
+    confirmButtonText: 'Cerrar'
+  }).then(() => removeQueryParam('eliminados'));
+</script>
+{% endif %}
+
+
+
+<!-- eliminarSeleccionados-->
+
+<script>
+function eliminarSeleccionados() {
+  const seleccionados = Array.from(document.querySelectorAll('.check-producto:checked'))
+    .map(cb => cb.value);
+
+  if (seleccionados.length === 0) {
+    alert("Selecciona al menos un producto para eliminar.");
+    return;
+  }
+
+  if (!confirm(`¿Eliminar ${seleccionados.length} productos seleccionados?`)) return;
+
+  fetch('/eliminar-multiple', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ ids: seleccionados })
+  })
+  .then(res => {
+    if (res.redirected) {
+      window.location.href = res.url;
+    } else {
+      alert("Error al eliminar productos.");
+    }
+  })
+  .catch(err => {
+    console.error("Error:", err);
+    alert("Error al eliminar productos.");
+  });
+}
+</script>
 
 
 

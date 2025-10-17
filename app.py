@@ -361,6 +361,10 @@ def agregar():
     return render_template('agregar.html')
 
 
+
+
+
+
 # ---------Editar producto---------------------
 @app.route('/editar/<id>', methods=['GET', 'POST'])
 def editar(id):
@@ -517,6 +521,23 @@ def exportar_stock():
 
 
 
+# -------------eliminar_producto_por_id-----------------
+
+def eliminar_producto_por_id(id, usuario):
+    producto = collection.find_one({'_id': ObjectId(id)})
+    if not producto:
+        return False
+
+    lote = producto.get("LOT", "Sin lote")
+    descripcion = producto.get("Description", "Sin descripción")
+    detalle = f"Producto eliminado: {descripcion}, LOT: {lote}"
+
+    registrar_evento(db, usuario, "Eliminar producto", detalle)
+    collection.delete_one({'_id': ObjectId(id)})
+    return True
+
+
+
 
 
 # ------------------------------
@@ -526,25 +547,32 @@ def eliminar(id):
     if 'usuario' not in session:
         return redirect('/')
 
-    # Recuperar el producto antes de eliminarlo
-    producto = collection.find_one({'_id': ObjectId(id)})
-    if not producto:
+    if eliminar_producto_por_id(id, session['usuario']):
+        flash("Producto eliminado correctamente.", "success")
+    else:
         flash("Producto no encontrado.", "danger")
-        return redirect('/inventario')
 
-    # Extraer datos clave para trazabilidad
-    lote = producto.get("LOT", "Sin lote")
-    descripcion = producto.get("Description", "Sin descripción")
-    detalle = f"Producto eliminado: {descripcion}, LOT: {lote}"
-
-    # Registrar auditoría
-    registrar_evento(db, session['usuario'], "Eliminar producto", detalle)
-
-    # Eliminar el producto
-    collection.delete_one({'_id': ObjectId(id)})
-
-    flash("Producto eliminado correctamente.", "success")
     return redirect('/inventario')
+
+
+# --------/eliminar-multiple'----------------------
+
+
+@app.route('/eliminar-multiple', methods=['POST'])
+def eliminar_multiple():
+    if 'usuario' not in session:
+        return redirect('/')
+
+    ids = request.json.get('ids', [])
+    eliminados = 0
+
+    for id in ids:
+        if eliminar_producto_por_id(id, session['usuario']):
+            eliminados += 1
+
+    return redirect(url_for('inventario', eliminados=eliminados))
+
+
 
 
 
