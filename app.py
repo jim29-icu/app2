@@ -7,6 +7,18 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from functools import wraps
+from flask import session, redirect, flash
+
+def solo_admin(f):
+    @wraps(f)
+    def decorada(*args, **kwargs):
+        if session.get('rol') != 'admin':
+            flash("Acceso denegado: solo administradores.", "danger")
+            return redirect('/inventario')
+        return f(*args, **kwargs)
+    return decorada
+
 
 
 app = Flask(__name__)
@@ -39,6 +51,7 @@ def registrar_evento(db, usuario, accion, detalle=""):
 
 # ------------Revisar auditoria------------------
 @app.route('/auditoria')
+@solo_admin
 def ver_auditoria():
     if 'usuario' not in session:
         return redirect('/')
@@ -71,6 +84,7 @@ def login():
         user = usuarios.find_one({"username": usuario})
         if user and check_password_hash(user["password"], password):
             session["usuario"] = usuario
+            session["rol"] = user.get("rol", "usuario") 
             return redirect(url_for("inventario"))  # 👈 redirige a tu vista principal
         else:
             flash("Usuario o contraseña incorrectos", "danger")

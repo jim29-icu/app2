@@ -7,6 +7,10 @@
     <a href="/inventario">Inventario</a>
     <a href="/equipos">Equipos</a>
     <a href="/Tarimas">Tarimas</a>
+    {% if session.rol == 'admin' %}
+      <a href="/auditoria">Auditoría</a>
+    {% endif %}
+    
     <a href="/logout">Cerrar sesión</a>
   </nav>
 </header>
